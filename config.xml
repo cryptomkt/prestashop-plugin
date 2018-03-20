@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+	<name>CryptoMarket Pago</name>
+	<displayName>
+		<![CDATA[CryptoMarket Pago]]>
+	</displayName>
+	<version>
+		<![CDATA[1.0.0]]>
+	</version>
+	<description>
+		<![CDATA[Integrate cryptocurrencies into Prestashop and welcome to the new way for payments. Simple, Free and totally Secure.]]>
+	</description>
+	<author>
+		<![CDATA[developers.cryptomkt.com]]>
+	</author>
+	<tab>
+		<![CDATA[Features]]>
+	</tab>
+	<confirmUninstall>
+		<![CDATA[Would you like uninstall this plugin?]]>
+	</confirmUninstall>
+	<is_configurable>0</is_configurable>
+	<need_instance>0</need_instance>
+	<limited_countries></limited_countries>
+</module>

@@ -1,0 +1,41 @@
+{
+    "name": "cryptomkt/prestashop-plugin",
+    "description": "CriptoMarket plugin for payments in PrestaShop",
+    "type": "whmcs-plugin",
+    "keywords": ["prestashop","plugin","payment","ecommerce","ethereum","cryptomkt"],
+    "homepage": "https://github.com/cryptomkt/prestashop-plugin",
+    "license": "MIT",
+    "support": {
+        "email": "support@cryptomkt.com",
+        "issues": "https://github.com/cryptomkt/prestashop-plugin/issues",
+        "source": "https://github.com/cryptomkt/prestashop-plugin"
+    },
+    "minimum-stability": "stable",
+    "authors": [
+        {
+            "name": "CryptoMarket Development Team",
+            "email": "support@cryptomkt.com",
+            "homepage": "https://soporte.cryptomkt.com/"
+        }
+    ],
+    "require": {
+        "php": ">=5.3",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "cryptomkt/cryptomkt": "~1.1",
+        "composer/installers": "~1.0"
+    },
+    "require-dev": {
+        "phpmd/phpmd": "*",
+        "phpdocumentor/phpdocumentor": "*",
+        "phing/phing": "*",
+        "pdepend/pdepend" : "1.1.0",
+        "squizlabs/php_codesniffer": "*",
+        "phpunit/phpunit": "*",
+        "phploc/phploc": "*",
+        "phpunit/phpunit-skeleton-generator": "*"
+    },
+    "config": {
+        "bin-dir": "bin"
+    }
+}
