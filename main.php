@@ -10,12 +10,12 @@ class Main extends Module{
 	public function __construct()
 	{
 		$this->name = 'main';
-		$this->tab = 'Features';
+		$this->tab = 'front_office_features';
 		$this->version = '1.0.0';
 		$this->author = 'CryptoMarket Development Team support@cryptomkt.com';
 		$this->need_instance = 0;
 		$this->ps_versions_compliancy = array('min' => , '1.5.x.x', 'max' => _PS_VERSION_);
-		$this->bootstrap = false;
+		$this->bootstrap = true;
 
 		parent::__construct();
 
