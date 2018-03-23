@@ -1,7 +1,7 @@
 {
     "name": "cryptomkt/prestashop-plugin",
     "description": "CriptoMarket plugin for payments in PrestaShop",
-    "type": "prestashop-plugin",
+    "type": "prestashop-module",
     "keywords": ["prestashop","plugin","payment","ecommerce","ethereum","cryptomkt"],
     "homepage": "https://github.com/cryptomkt/prestashop-plugin",
     "license": "MIT",
