@@ -24,6 +24,10 @@ class cryptomarket extends PaymentModule{
 		// $this->need_instance = 0;
 		$this->ps_versions_compliancy = array('min' => '1.6.x.x', 'max' => _PS_VERSION_);
 		$this->bootstrap = true;
+    $this->controllers = array('payment', 'validation');
+    $this->sslport         = $sslport;
+    $this->verifypeer      = $verifypeer;
+    $this->verifyhost      = $verifyhost;
 		$this->currencies = true;  
 
 		parent::__construct();
@@ -32,7 +36,7 @@ class cryptomarket extends PaymentModule{
 		$this->description = $this->l('Integrate cryptocurrencies into Prestashop and welcome to the new way for payments. Simple, Free and totally Secure.');
 		$this->confirmUninstall = $this->l('Would you like uninstall this plugin?');
 
-		$this->templateFile = 'module::main/views/templates/hook/main.tpl';
+		// $this->templateFile = 'module::main/views/templates/hook/main.tpl';
 	}
 
 	public function install() {
@@ -41,7 +45,7 @@ class cryptomarket extends PaymentModule{
         return false;
       }
 
-      if (!parent::install()) {
+      if (!parent::install() || !$this->registerHook('paymentOptions')) {
         return false;
       }
 
@@ -52,24 +56,7 @@ class cryptomarket extends PaymentModule{
       $db->Execute($query);
 
       return true;
-    }	
-
- //    public function hookDisplayHeader()
-	// {
-	//     if (file_exists('composer.phar'))
-	//     {
-	//         // echo 'Extracting composer.phar ...' . PHP_EOL;
-	//         // flush();
-	//         $composer = new Phar('composer.phar');
-	//         $composer->extractTo('extracted');
-	//         $this->_errors[] = $this->l('ziiiiiiiiiii');
-	//         return true;
-	//     }
-	//     else{
-	// 		$this->_errors[] = $this->l('nooooooooo');
-	// 		return false;
-	//     }
-	// }
+    }
 
 	public function getContent() {
       $this->_postProcess();
@@ -85,29 +72,29 @@ class cryptomarket extends PaymentModule{
                        <b>'.$this->l('This module allows you to accept payments by CryptoMarket.').'</b><br /><br />
                        '.$this->l('If the client chooses this payment mode, your CriptoMarket account will be automatically credited.').'<br />
                        '.$this->l('You need to configure your CryptoMarket account before using this module.').'</div>';
-    }
+  }
 
-    private function _postProcess() {
-      global $currentIndex, $cookie;
-      if (Tools::isSubmit('submitcryptomarket')) {
-        $template_available = array('A', 'B', 'C');
-        $this->_errors      = array();
-        if (Tools::getValue('apikey_criptomarket') == NULL)
-          $this->_errors[]  = $this->l('Missing API Key');
-        if (count($this->_errors) > 0) {
-          $error_msg = '';
-          
-          foreach ($this->_errors AS $error)
-            $error_msg .= $error.'<br />';
-          
-          $this->_html = $this->displayError($error_msg);
-        } else {
-          Configuration::updateValue('apikey', trim(Tools::getValue('apikey')));
-          Configuration::updateValue('apisecret', trim(Tools::getValue('apisecret')));
-          $this->_html = $this->displayConfirmation($this->l('Settings updated'));
-        }
+  private function _postProcess() {
+    global $currentIndex, $cookie;
+    if (Tools::isSubmit('submitcryptomarket')) {
+      $template_available = array('A', 'B', 'C');
+      $this->_errors      = array();
+      if (Tools::getValue('apikey') == NULL)
+        $this->_errors[]  = $this->l('Missing API Key');
+      if (count($this->_errors) > 0) {
+        $error_msg = '';
+        
+        foreach ($this->_errors AS $error)
+          $error_msg .= $error.'<br />';
+        
+        $this->_html = $this->displayError($error_msg);
+      } else {
+        Configuration::updateValue('apikey', trim(Tools::getValue('apikey')));
+        Configuration::updateValue('apisecret', trim(Tools::getValue('apisecret')));
+        $this->_html = $this->displayConfirmation($this->l('Settings updated'));
       }
     }
+  }
 
 	private function _setConfigurationForm() {
       $this->_html .= '<form method="post" action="'.htmlentities($_SERVER['REQUEST_URI']).'">
@@ -142,24 +129,42 @@ class cryptomarket extends PaymentModule{
       $html = '<h2>'.$this->l('Settings').'</h2>
                <div style="clear:both;margin-bottom:30px;">
                <h3 style="clear:both;margin-left:5px;margin-top:10px">'.$this->l('API Key').'</h3>
-               <input type="text" style="width:400px;" name="apikey_criptomarket" value="'.htmlentities(Tools::getValue('apikey', Configuration::get('criptomarket_APIKEY')), ENT_COMPAT, 'UTF-8').'" />
+               <input type="text" style="width:400px;" name="apikey" value="'.htmlentities(Tools::getValue('apikey', Configuration::get('apikey')), ENT_COMPAT, 'UTF-8').'" />
                </div>
                <h3 style="clear:both;margin-left:5px">'.$this->l('API Secret').'</h3>               
-               <input type="text" style="width:400px;" name="apisecret_criptomarket" value="'.htmlentities(Tools::getValue('apisecret', Configuration::get('criptomarket_APISECRET')), ENT_COMPAT, 'UTF-8').'" />
+               <input type="text" style="width:400px;" name="apisecret" value="'.htmlentities(Tools::getValue('apisecret', Configuration::get('apisecret')), ENT_COMPAT, 'UTF-8').'" />
                </div>
-               <p class="center"><input class="button" type="submit" name="submitbitpay" value="'.$this->l('Save settings').'" /></p>';
+               <p class="center"><input class="button" type="submit" name="submitcryptomarket" value="'.$this->l('Save settings').'" /></p>';
       return $html;
     }
 
 
 	public function uninstall()
 	{
-		$this->clearCache('*');
+		// $this->clearCache('*');
 
 		if( !parent::uninstall() || !$this->unregisterHook('displayHome'))
 			return false;
 
 		return true;
 	}
+
+  public function hookPaymentOptions($params)
+  {
+
+      $payment_options = [
+          $this->linkToCryptoMkt(),
+      ];
+              
+      return $payment_options;
+  }
+  
+  public function linkToCryptoMkt()
+  {
+      $cryptomarket_option = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
+      $cryptomarket_option->setCallToActionText($this->l('CryptoMarket'))
+                    ->setAction(Configuration::get('PS_FO_PROTOCOL').__PS_BASE_URI__."modules/{$this->name}/payment.php");
+      return $cryptomarket_option;
+  }
 }
 ?>
