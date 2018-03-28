@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <module>
 	<name>cryptomarket</name>
-	<displayName><![CDATA[CryptoMarket Pago]]></displayName>
+	<displayName><![CDATA[CryptoMarket]]></displayName>
 	<version><![CDATA[1.0.0]]></version>
 	<description><![CDATA[Integrate cryptocurrencies into Prestashop and welcome to the new way for payments. Simple, Free and totally Secure.]]></description>
 	<author><![CDATA[CryptoMarket Development Team]]></author>

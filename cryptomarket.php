@@ -7,9 +7,13 @@ exit;
 //composer autoload
 if(file_exists('vendor/autoload.php')){
 	require_once('vendor/autoload.php');
+  // use Cryptomkt\Exchange\Client;
+  // include 'vendor/cryptomkt/cryptomkt/src/Client.php';
+  // include 'vendor/cryptomkt/cryptomkt/src/Configuration.php';
 }
 
 class cryptomarket extends PaymentModule{
+  private $_html = '';
 
 	/**
 	 * [__construct define details of module]
@@ -23,16 +27,16 @@ class cryptomarket extends PaymentModule{
 		$this->className = 'cryptomarket';
 		// $this->need_instance = 0;
 		$this->ps_versions_compliancy = array('min' => '1.6.x.x', 'max' => _PS_VERSION_);
-		$this->bootstrap = true;
+		$this->bootstrap = false;
     $this->controllers = array('payment', 'validation');
-    $this->sslport         = $sslport;
-    $this->verifypeer      = $verifypeer;
-    $this->verifyhost      = $verifyhost;
+    $this->sslport         = 443;
+    $this->verifypeer      = 1;
+    $this->verifyhost      = 2;
 		$this->currencies = true;  
 
 		parent::__construct();
 
-		$this->displayName = $this->l('CryptoMarket Pago');
+		$this->displayName = $this->l('CryptoMarket');
 		$this->description = $this->l('Integrate cryptocurrencies into Prestashop and welcome to the new way for payments. Simple, Free and totally Secure.');
 		$this->confirmUninstall = $this->l('Would you like uninstall this plugin?');
 
@@ -40,23 +44,27 @@ class cryptomarket extends PaymentModule{
 	}
 
 	public function install() {
-      if(!function_exists('curl_version')) {
-        $this->_errors[] = $this->l('Sorry, this module requires the cURL PHP extension but it is not enabled on your server.  Please ask your web hosting provider for assistance.');
-        return false;
-      }
-
-      if (!parent::install() || !$this->registerHook('paymentOptions')) {
-        return false;
-      }
-
-      $db = Db::getInstance();
-      $query = "CREATE TABLE `"._DB_PREFIX_."cryptomarket` (
-                `api_key` varchar(255) NOT NULL,
-                `api_secret` varchar(255) NOT NULL) ENGINE="._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8';
-      $db->Execute($query);
-
-      return true;
+    if(!function_exists('curl_version')) {
+      $this->_errors[] = $this->l('Sorry, this module requires the cURL PHP extension but it is not enabled on your server.  Please ask your web hosting provider for assistance.');
+      return false;
     }
+
+    // if (!parent::install() || !$this->registerHook('paymentOptions')) {
+    //   return false;
+    // }
+
+    if (!parent::install() || !$this->registerHook('invoice') || !$this->registerHook('paymentReturn') || !$this->registerHook('payment') || !$this->registerHook('paymentOptions')) {
+        return false;
+      }
+
+    $db = Db::getInstance();
+    $query = "CREATE TABLE `"._DB_PREFIX_."cryptomarket` (
+              `api_key` varchar(255) NOT NULL,
+              `api_secret` varchar(255) NOT NULL) ENGINE="._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8';
+    $db->Execute($query);
+
+    return true;
+  }
 
 	public function getContent() {
       $this->_postProcess();
@@ -65,7 +73,7 @@ class cryptomarket extends PaymentModule{
       return $this->_html;
     }
 
-    private function _setSettingHeader() {
+  private function _setSettingHeader() {
       $this->_html .= '<div style="padding: 20px 50px 50px;">
                       <h2>'.$this->l('CryptoMarket').'</h2>
                       <img src="../modules/bitpay/bitcoin.png" style="float:left; margin-right:15px;" />
@@ -149,8 +157,61 @@ class cryptomarket extends PaymentModule{
 		return true;
 	}
 
+  public function hookInvoice($params) {
+    global $smarty;
+          
+    $id_order = $params['id_order'];
+    $bitcoinpaymentdetails = $this->readBitcoinpaymentdetails($id_order);
+    if($bitcoinpaymentdetails['invoice_id'] === 0)
+    {
+        return;
+    }
+    
+    $smarty->assign(array(
+                          'bitpayurl'    =>  $this->bitpayurl,
+                          'invoice_id'    => $bitcoinpaymentdetails['invoice_id'],
+                          'status'        => $bitcoinpaymentdetails['status'],
+                          'id_order'      => $id_order,
+                          'this_page'     => $_SERVER['REQUEST_URI'],
+                          'this_path'     => $this->_path,
+                          'this_path_ssl' => Configuration::get('PS_FO_PROTOCOL').$_SERVER['HTTP_HOST'].__PS_BASE_URI__."modules/{$this->name}/"
+                         ));
+    return $this->display(__FILE__, 'invoice_block.tpl');
+  }
+
+  public function hookPayment($params)
+  {
+    if (!$this->active)
+      return;
+
+    $this->smarty->assign(array(
+      'this_path' => $this->_path,
+      'this_path_bw' => $this->_path,
+      'this_path_ssl' => Tools::getShopDomainSsl(true, true).__PS_BASE_URI__.'modules/'.$this->name.'/'
+    ));
+
+    return $this->display(__FILE__, 'payment.tpl');
+  }
+
+  public function hookPaymentReturn($params) {
+    global $smarty;
+    
+    $order = ($params['objOrder']);
+    $state = $order->current_state;
+    $smarty->assign(array(
+                          'state'         => $state,
+                          'this_path'     => $this->_path,
+                          'this_path_ssl' => Configuration::get('PS_FO_PROTOCOL').$_SERVER['HTTP_HOST'].__PS_BASE_URI__."modules/{$this->name}/"));
+    return $this->display(__FILE__, 'payment_return.tpl');
+  }
+
   public function hookPaymentOptions($params)
   {
+      if (!$this->active) {
+            return;
+      }
+      else{
+      }
 
       $payment_options = [
           $this->linkToCryptoMkt(),
@@ -158,6 +219,98 @@ class cryptomarket extends PaymentModule{
               
       return $payment_options;
   }
+
+  public function execPayment($cart) { 
+    // $configuration = Configuration::apiKey(Configuration::get('api_key'), Configuration::get('api_secret'));
+    // $client = Client::create($configuration);
+
+    // var_dump($client);
+
+      // Create invoice
+      // $currency                    = Currency::getCurrencyInstance((int)$cart->id_currency);
+      // $options                     = $_POST;
+      // $options['transactionSpeed'] = Configuration::get('bitpay_TXSPEED');
+      // $options['currency']         = $currency->iso_code;
+      // $total                       = $cart->getOrderTotal(true);
+      
+      // $options['notificationURL']  = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'modules/'.$this->name.'/ipn.php';
+      // if (_PS_VERSION_ <= '1.5')
+      //   $options['redirectURL']    = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'order-confirmation.php?id_cart='.$cart->id.'&id_module='.$this->id.'&id_order='.$this->currentOrder;
+      // else
+      //   $options['redirectURL']    = Context::getContext()->link->getModuleLink('bitpay', 'validation');
+      // $options['posData']          = '{"cart_id": "' . $cart->id . '"';
+      // $options['posData']         .= ', "hash": "' . crypt($cart->id, Configuration::get('bitpay_APIKEY')) . '"';
+      // $this->key                   = $this->context->customer->secure_key;
+      
+      // $options['posData']         .= ', "key": "' . $this->key . '"}';
+      // $options['orderID']          = $cart->id;
+      // $options['price']            = $total;
+      // $options['fullNotifications'] = true;
+      // $postOptions                 = array('orderID', 'itemDesc', 'itemCode', 
+      //                                      'notificationEmail', 'notificationURL', 'redirectURL', 
+      //                                      'posData', 'price', 'currency', 'physical', 'fullNotifications',
+      //                                      'transactionSpeed', 'buyerName', 'buyerAddress1', 
+      //                                      'buyerAddress2', 'buyerCity', 'buyerState', 'buyerZip', 
+      //                                      'buyerEmail', 'buyerPhone');
+      
+      // foreach($postOptions as $o) {
+      //   if (array_key_exists($o, $options))
+      //     $post[$o] = $options[$o];
+      // }
+      // if(function_exists('json_encode'))
+      //   $post = json_encode($post);
+      // else
+      //   $post = rmJSONencode($post);
+      // // Call BitPay
+      // $curl = curl_init($this->apiurl.'/api/invoice/');
+      // $length = 0;
+      // if ($post) {
+      //   curl_setopt($curl, CURLOPT_POST, 1);
+      //   curl_setopt($curl, CURLOPT_POSTFIELDS, $post);
+      //   $length = strlen($post);
+      // }
+      // $uname  = base64_encode(Configuration::get('bitpay_APIKEY'));
+      // $header = array(
+      //                 'Content-Type: application/json',
+      //                 'Content-Length: ' . $length,
+      //                 'Authorization: Basic ' . $uname,
+      //                 'X-BitPay-Plugin-Info: PrestaShop'.$this->version,
+      //                );
+      // curl_setopt($curl, CURLINFO_HEADER_OUT, true);
+      // curl_setopt($curl, CURLOPT_PORT, $this->sslport);
+      // curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
+      // curl_setopt($curl, CURLOPT_TIMEOUT, 10);
+      // curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC ) ;
+      // curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $this->verifypeer); // verify certificate (1)
+      // curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $this->verifyhost); // check existence of CN and verify that it matches hostname (2)
+      // curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+      // curl_setopt($curl, CURLOPT_FORBID_REUSE, 1);
+      // curl_setopt($curl, CURLOPT_FRESH_CONNECT, 1);
+      
+      // $responseString = curl_exec($curl);
+      // if(!$responseString) {
+      //   $response = curl_error($curl);
+      //   die(Tools::displayError("Error: no data returned from API server!"));
+      
+      // } else {
+      //   if(function_exists('json_decode'))
+      //     $response = json_decode($responseString, true);
+      //   else
+      //     $response = rmJSONdecode($responseString);
+      // }
+      // curl_close($curl);
+      // if(isset($response['error'])) {
+      //   bplog($response['error']);
+      //   die(Tools::displayError("Error occurred! (" . $response['error']['type'] . " - " . $response['error']['message'] . ")"));
+      // } else if(!$response['url']) {
+      //   die(Tools::displayError("Error: Response did not include invoice url!"));
+      // } else {
+      //   \ob_clean();  
+      //   header('Location:  ' . $response['url']);
+      //   exit;
+      // }
+ 
+    }
   
   public function linkToCryptoMkt()
   {
