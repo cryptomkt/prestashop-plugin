@@ -5,12 +5,14 @@ if( !defined('_PS_VERSION_'))
 exit;
 
 //composer autoload
-if(file_exists('vendor/autoload.php')){
-	require_once('vendor/autoload.php');
-  // use Cryptomkt\Exchange\Client;
+	// $loader = require 'vendor/autoload.php';
+  $loader = require __DIR__ . '/vendor/autoload.php';
+  // use Cryptomkt\Exchange\Client as CMClient;
+  $loader->add('Cryptomkt\\Exchange\\Client', __DIR__);
+  $loader->add('Cryptomkt\\Exchange\\Configuration as CMConfiguration', __DIR__);
+
   // include 'vendor/cryptomkt/cryptomkt/src/Client.php';
   // include 'vendor/cryptomkt/cryptomkt/src/Configuration.php';
-}
 
 class cryptomarket extends PaymentModule{
   private $_html = '';
@@ -59,6 +61,7 @@ class cryptomarket extends PaymentModule{
 
     $db = Db::getInstance();
     $query = "CREATE TABLE `"._DB_PREFIX_."cryptomarket` (
+              `payment_receiver` varchar(255) NOT NULL,
               `api_key` varchar(255) NOT NULL,
               `api_secret` varchar(255) NOT NULL) ENGINE="._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8';
     $db->Execute($query);
@@ -75,9 +78,8 @@ class cryptomarket extends PaymentModule{
 
   private function _setSettingHeader() {
       $this->_html .= '<div style="padding: 20px 50px 50px;">
-                      <h2>'.$this->l('CryptoMarket').'</h2>
-                      <img src="../modules/bitpay/bitcoin.png" style="float:left; margin-right:15px;" />
-                       <b>'.$this->l('This module allows you to accept payments by CryptoMarket.').'</b><br /><br />
+                      <img src="../modules/cryptomarket/logotipo-bld.png" />
+                       <br><b>'.$this->l('This module allows you to accept payments by CryptoMarket.').'</b><br /><br />
                        '.$this->l('If the client chooses this payment mode, your CriptoMarket account will be automatically credited.').'<br />
                        '.$this->l('You need to configure your CryptoMarket account before using this module.').'</div>';
   }
@@ -97,6 +99,7 @@ class cryptomarket extends PaymentModule{
         
         $this->_html = $this->displayError($error_msg);
       } else {
+        Configuration::updateValue('payment_receiver', trim(Tools::getValue('payment_receiver')));
         Configuration::updateValue('apikey', trim(Tools::getValue('apikey')));
         Configuration::updateValue('apisecret', trim(Tools::getValue('apisecret')));
         $this->_html = $this->displayConfirmation($this->l('Settings updated'));
@@ -136,13 +139,22 @@ class cryptomarket extends PaymentModule{
       
       $html = '<h2>'.$this->l('Settings').'</h2>
                <div style="clear:both;margin-bottom:30px;">
+
+               <h3 style="clear:both;margin-left:5px;margin-top:10px">'.$this->l('Payment Receiver Email').'</h3>
+
+               <input type="text" style="width:400px;" name="payment_receiver" value="'.htmlentities(Tools::getValue('payment_receiver', Configuration::get('payment_receiver')), ENT_COMPAT, 'UTF-8').'" />
+
                <h3 style="clear:both;margin-left:5px;margin-top:10px">'.$this->l('API Key').'</h3>
+               
                <input type="text" style="width:400px;" name="apikey" value="'.htmlentities(Tools::getValue('apikey', Configuration::get('apikey')), ENT_COMPAT, 'UTF-8').'" />
-               </div>
+               
                <h3 style="clear:both;margin-left:5px">'.$this->l('API Secret').'</h3>               
+               
                <input type="text" style="width:400px;" name="apisecret" value="'.htmlentities(Tools::getValue('apisecret', Configuration::get('apisecret')), ENT_COMPAT, 'UTF-8').'" />
+
+               <p class="center"><input class="button" type="submit" name="submitcryptomarket" value="'.$this->l('Save settings').'" /></p>
                </div>
-               <p class="center"><input class="button" type="submit" name="submitcryptomarket" value="'.$this->l('Save settings').'" /></p>';
+               ';
       return $html;
     }
 
@@ -220,9 +232,38 @@ class cryptomarket extends PaymentModule{
       return $payment_options;
   }
 
-  public function execPayment($cart) { 
-    // $configuration = Configuration::apiKey(Configuration::get('api_key'), Configuration::get('api_secret'));
-    // $client = Client::create($configuration);
+  public function execPayment($cart) {
+    // p($this->context);
+    $configuration = Cryptomkt\Exchange\Configuration::apiKey(Configuration::get('apikey'), Configuration::get('apisecret'));
+    $client = Cryptomkt\Exchange\Client::create($configuration);
+
+    $currency = Currency::getCurrencyInstance((int)$cart->id_currency);
+    // $payment = array(
+    //   'payment_receiver' => Configuration::get('payment_receiver'),
+    //   'to_receive_currency' => $currency->iso_code,
+    //   'to_receive' => $cart->getOrderTotal(true),
+    //   'external_id' => $cart->id,
+    //   'callback_url' => $this->context->customer->email,
+    //   'error_url' => '',
+    //   'success_url' => '',
+    //   'refund_email' => Configuration::get('payment_receiver')
+    //   );
+
+    $payment = array(
+        'to_receive' => '3000',
+        'to_receive_currency' => 'CLP',
+        'payment_receiver' => 'ppbb15@gmail.com',
+        'external_id' => '123456CM',
+        'callback_url' => '',
+        'error_url' => '',
+        'success_url' => '',
+        'refund_email' => 'ppbb15@gmail.com'
+      );
+  
+    // p(Configuration::get('apikey'));
+    // d(Configuration::get('apisecret'));
+    p($payment);
+    d($client->createPayOrder($payment));
 
     // var_dump($client);
 
