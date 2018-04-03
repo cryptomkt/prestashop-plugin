@@ -15,7 +15,7 @@ class cryptomarketValidationModuleFrontController extends ModuleFrontController
                 // Check that this payment option is still available in case the customer changed his address just before the end of the checkout process
                 $authorized = false;
                 foreach (Module::getPaymentModules() as $module)
-                        if ($module['name'] == 'bitpay')
+                        if ($module['name'] == 'cryptomarket')
                         {
                                 $authorized = true;
                                 break;
@@ -32,6 +32,10 @@ class cryptomarketValidationModuleFrontController extends ModuleFrontController
 
                 $mailVars = array(
                 );
+
+                // d('index.php?controller=order-confirmation&id_cart='.(int)$cart->id.'&id_module='.(int)$this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key);
+                
+                $this->module->validateOrder($cart->id, Configuration::get('PS_OS_PAYMENT'), $total, $this->module->displayName, NULL, $mailVars, (int)$currency->id, false, $customer->secure_key); 
 
                 Tools::redirect('index.php?controller=order-confirmation&id_cart='.(int)$cart->id.'&id_module='.(int)$this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key);
         }

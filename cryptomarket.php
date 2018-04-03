@@ -233,125 +233,47 @@ class cryptomarket extends PaymentModule{
   }
 
   public function execPayment($cart) {
-    // p($this->context);
     $configuration = Cryptomkt\Exchange\Configuration::apiKey(Configuration::get('apikey'), Configuration::get('apisecret'));
     $client = Cryptomkt\Exchange\Client::create($configuration);
 
     $currency = Currency::getCurrencyInstance((int)$cart->id_currency);
-    // $payment = array(
-    //   'payment_receiver' => Configuration::get('payment_receiver'),
-    //   'to_receive_currency' => $currency->iso_code,
-    //   'to_receive' => $cart->getOrderTotal(true),
-    //   'external_id' => $cart->id,
-    //   'callback_url' => $this->context->customer->email,
-    //   'error_url' => '',
-    //   'success_url' => '',
-    //   'refund_email' => Configuration::get('payment_receiver')
-    //   );
-
+    
+    // $notification_url = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'modules/'.$this->name.'/ipn.php';
+      
+    if (_PS_VERSION_ <= '1.5')
+      $redirect_url = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'order-confirmation.php?id_cart='.$cart->id.'&id_module='.$this->id.'&id_order='.$this->currentOrder;
+    else
+      $redirect_url = Context::getContext()->link->getModuleLink('cryptomarket', 'validation');
+    
     $payment = array(
-        'to_receive' => '3000',
-        'to_receive_currency' => 'CLP',
-        'payment_receiver' => 'ppbb15@gmail.com',
-        'external_id' => '123456CM',
-        'callback_url' => '',
-        'error_url' => '',
-        'success_url' => '',
-        'refund_email' => 'ppbb15@gmail.com'
+      'payment_receiver' => Configuration::get('payment_receiver'),
+      'to_receive_currency' => $currency->iso_code,
+      'to_receive' => $cart->getOrderTotal(true),
+      'external_id' => $cart->id,
+      'callback_url' => $redirect_url,
+      'error_url' => $redirect_url . '&success=0',
+      'success_url' => $redirect_url . '&success=1',
+      'refund_email' => $this->context->customer->email
       );
-  
-    // p(Configuration::get('apikey'));
-    // d(Configuration::get('apisecret'));
-    p($payment);
-    d($client->createPayOrder($payment));
 
-    // var_dump($client);
+    // header('Location:  ' . $redirect_url); exit;
+    // 
+    // d($client->createPayOrder($payment));
 
-      // Create invoice
-      // $currency                    = Currency::getCurrencyInstance((int)$cart->id_currency);
-      // $options                     = $_POST;
-      // $options['transactionSpeed'] = Configuration::get('bitpay_TXSPEED');
-      // $options['currency']         = $currency->iso_code;
-      // $total                       = $cart->getOrderTotal(true);
-      
-      // $options['notificationURL']  = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'modules/'.$this->name.'/ipn.php';
-      // if (_PS_VERSION_ <= '1.5')
-      //   $options['redirectURL']    = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'order-confirmation.php?id_cart='.$cart->id.'&id_module='.$this->id.'&id_order='.$this->currentOrder;
-      // else
-      //   $options['redirectURL']    = Context::getContext()->link->getModuleLink('bitpay', 'validation');
-      // $options['posData']          = '{"cart_id": "' . $cart->id . '"';
-      // $options['posData']         .= ', "hash": "' . crypt($cart->id, Configuration::get('bitpay_APIKEY')) . '"';
-      // $this->key                   = $this->context->customer->secure_key;
-      
-      // $options['posData']         .= ', "key": "' . $this->key . '"}';
-      // $options['orderID']          = $cart->id;
-      // $options['price']            = $total;
-      // $options['fullNotifications'] = true;
-      // $postOptions                 = array('orderID', 'itemDesc', 'itemCode', 
-      //                                      'notificationEmail', 'notificationURL', 'redirectURL', 
-      //                                      'posData', 'price', 'currency', 'physical', 'fullNotifications',
-      //                                      'transactionSpeed', 'buyerName', 'buyerAddress1', 
-      //                                      'buyerAddress2', 'buyerCity', 'buyerState', 'buyerZip', 
-      //                                      'buyerEmail', 'buyerPhone');
-      
-      // foreach($postOptions as $o) {
-      //   if (array_key_exists($o, $options))
-      //     $post[$o] = $options[$o];
-      // }
-      // if(function_exists('json_encode'))
-      //   $post = json_encode($post);
-      // else
-      //   $post = rmJSONencode($post);
-      // // Call BitPay
-      // $curl = curl_init($this->apiurl.'/api/invoice/');
-      // $length = 0;
-      // if ($post) {
-      //   curl_setopt($curl, CURLOPT_POST, 1);
-      //   curl_setopt($curl, CURLOPT_POSTFIELDS, $post);
-      //   $length = strlen($post);
-      // }
-      // $uname  = base64_encode(Configuration::get('bitpay_APIKEY'));
-      // $header = array(
-      //                 'Content-Type: application/json',
-      //                 'Content-Length: ' . $length,
-      //                 'Authorization: Basic ' . $uname,
-      //                 'X-BitPay-Plugin-Info: PrestaShop'.$this->version,
-      //                );
-      // curl_setopt($curl, CURLINFO_HEADER_OUT, true);
-      // curl_setopt($curl, CURLOPT_PORT, $this->sslport);
-      // curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
-      // curl_setopt($curl, CURLOPT_TIMEOUT, 10);
-      // curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC ) ;
-      // curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $this->verifypeer); // verify certificate (1)
-      // curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $this->verifyhost); // check existence of CN and verify that it matches hostname (2)
-      // curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-      // curl_setopt($curl, CURLOPT_FORBID_REUSE, 1);
-      // curl_setopt($curl, CURLOPT_FRESH_CONNECT, 1);
-      
-      // $responseString = curl_exec($curl);
-      // if(!$responseString) {
-      //   $response = curl_error($curl);
-      //   die(Tools::displayError("Error: no data returned from API server!"));
-      
-      // } else {
-      //   if(function_exists('json_decode'))
-      //     $response = json_decode($responseString, true);
-      //   else
-      //     $response = rmJSONdecode($responseString);
-      // }
-      // curl_close($curl);
-      // if(isset($response['error'])) {
-      //   bplog($response['error']);
-      //   die(Tools::displayError("Error occurred! (" . $response['error']['type'] . " - " . $response['error']['message'] . ")"));
-      // } else if(!$response['url']) {
-      //   die(Tools::displayError("Error: Response did not include invoice url!"));
-      // } else {
-      //   \ob_clean();  
-      //   header('Location:  ' . $response['url']);
-      //   exit;
-      // }
- 
+    if( $result = $client->createPayOrder($payment) ){
+      $smarty->assign(array(
+                          'state'         => $state,
+                          'this_path'     => $this->_path,
+                          'this_path_ssl' => Configuration::get('PS_FO_PROTOCOL').$_SERVER['HTTP_HOST'].__PS_BASE_URI__."modules/{$this->name}/"));
+    
+      // \ob_clean();  
+      // header('Location:  ' . $result['payment_url']);
+      // exit;
     }
+
+    return $this->display(__FILE__, 'payment_execution.tpl');
+ 
+  }
   
   public function linkToCryptoMkt()
   {
