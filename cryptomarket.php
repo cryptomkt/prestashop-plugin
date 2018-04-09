@@ -1,18 +1,12 @@
 <?php
-// use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
 if( !defined('_PS_VERSION_'))
 exit;
 
 //composer autoload
-	// $loader = require 'vendor/autoload.php';
-  $loader = require __DIR__ . '/vendor/autoload.php';
-  // use Cryptomkt\Exchange\Client as CMClient;
-  $loader->add('Cryptomkt\\Exchange\\Client', __DIR__);
-  $loader->add('Cryptomkt\\Exchange\\Configuration as CMConfiguration', __DIR__);
-
-  // include 'vendor/cryptomkt/cryptomkt/src/Client.php';
-  // include 'vendor/cryptomkt/cryptomkt/src/Configuration.php';
+$loader = require __DIR__ . '/vendor/autoload.php';
+$loader->add('Cryptomkt\\Exchange\\Client', __DIR__);
+$loader->add('Cryptomkt\\Exchange\\Configuration as CMConfiguration', __DIR__);
 
 class cryptomarket extends PaymentModule{
   private $_html = '';
@@ -27,13 +21,12 @@ class cryptomarket extends PaymentModule{
 		$this->version = '1.0.0';
 		$this->author = 'CryptoMarket Development Team';
 		$this->className = 'cryptomarket';
-		// $this->need_instance = 0;
-		$this->ps_versions_compliancy = array('min' => '1.6.x.x', 'max' => _PS_VERSION_);
+		$this->ps_versions_compliancy = array('min' => '1.5.x.x', 'max' => _PS_VERSION_);
 		$this->bootstrap = false;
     $this->controllers = array('payment', 'validation');
-    $this->sslport         = 443;
-    $this->verifypeer      = 1;
-    $this->verifyhost      = 2;
+    $this->sslport = 443;
+    $this->verifypeer = 1;
+    $this->verifyhost = 2;
 		$this->currencies = true;  
 
 		parent::__construct();
@@ -41,8 +34,6 @@ class cryptomarket extends PaymentModule{
 		$this->displayName = $this->l('CryptoMarket');
 		$this->description = $this->l('Integrate cryptocurrencies into Prestashop and welcome to the new way for payments. Simple, Free and totally Secure.');
 		$this->confirmUninstall = $this->l('Would you like uninstall this plugin?');
-
-		// $this->templateFile = 'module::main/views/templates/hook/main.tpl';
 	}
 
 	public function install() {
@@ -51,20 +42,9 @@ class cryptomarket extends PaymentModule{
       return false;
     }
 
-    // if (!parent::install() || !$this->registerHook('paymentOptions')) {
-    //   return false;
-    // }
-
     if (!parent::install() || !$this->registerHook('invoice') || !$this->registerHook('paymentReturn') || !$this->registerHook('payment') || !$this->registerHook('paymentOptions')) {
         return false;
-      }
-
-    $db = Db::getInstance();
-    $query = "CREATE TABLE `"._DB_PREFIX_."cryptomarket` (
-              `payment_receiver` varchar(255) NOT NULL,
-              `api_key` varchar(255) NOT NULL,
-              `api_secret` varchar(255) NOT NULL) ENGINE="._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8';
-    $db->Execute($query);
+     }
 
     return true;
   }
@@ -195,7 +175,6 @@ class cryptomarket extends PaymentModule{
   {
     if (!$this->active)
       return;
-
     $this->smarty->assign(array(
       'this_path' => $this->_path,
       'this_path_bw' => $this->_path,
@@ -233,52 +212,63 @@ class cryptomarket extends PaymentModule{
   }
 
   public function execPayment($cart) {
+    global $smarty;
+
     $configuration = Cryptomkt\Exchange\Configuration::apiKey(Configuration::get('apikey'), Configuration::get('apisecret'));
     $client = Cryptomkt\Exchange\Client::create($configuration);
 
     $currency = Currency::getCurrencyInstance((int)$cart->id_currency);
-    
-    // $notification_url = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'modules/'.$this->name.'/ipn.php';
       
     if (_PS_VERSION_ <= '1.5')
-      $redirect_url = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'order-confirmation.php?id_cart='.$cart->id.'&id_module='.$this->id.'&id_order='.$this->currentOrder;
+      $redirect_url = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'order-confirmation.php?id_cart='.$cart->id.'&id_module='.$this->id.'&id_order='.$this->currentOrder; 
     else
       $redirect_url = Context::getContext()->link->getModuleLink('cryptomarket', 'validation');
-    
-    $payment = array(
-      'payment_receiver' => Configuration::get('payment_receiver'),
-      'to_receive_currency' => $currency->iso_code,
-      'to_receive' => $cart->getOrderTotal(true),
-      'external_id' => $cart->id,
-      'callback_url' => $redirect_url,
-      'error_url' => $redirect_url . '&success=0',
-      'success_url' => $redirect_url . '&success=1',
-      'refund_email' => $this->context->customer->email
-      );
 
-    // header('Location:  ' . $redirect_url); exit;
-    // 
-    // d($client->createPayOrder($payment));
+    $result = $client->getTicker(array('market' => 'ETH'.$currency->iso_code));
 
-    if( $result = $client->createPayOrder($payment) ){
-      $smarty->assign(array(
-                          'state'         => $state,
-                          'this_path'     => $this->_path,
-                          'this_path_ssl' => Configuration::get('PS_FO_PROTOCOL').$_SERVER['HTTP_HOST'].__PS_BASE_URI__."modules/{$this->name}/"));
-    
-      // \ob_clean();  
-      // header('Location:  ' . $result['payment_url']);
-      // exit;
+    //Min value validation
+    $min_value = (int)$result[0]['bid'] * 0.001;
+    $total_order = (int)$cart->getOrderTotal(true);
+
+    if(  $total_order > $min_value ){
+      try {
+        $payment = array(
+          'payment_receiver' => Configuration::get('payment_receiver'),
+          'to_receive_currency' => $currency->iso_code,
+          'to_receive' => $cart->getOrderTotal(true) + 3000,
+          'external_id' => $cart->id,
+          'callback_url' => $redirect_url,
+          'error_url' => $this->context->link->getPagelink('order&step=3'),
+          'success_url' => $redirect_url,
+          'refund_email' => $this->context->customer->email
+        );
+
+        $payload = $client->createPayOrder($payment);
+        \ob_clean();  
+        header('Location:  ' . $payload['payment_url']);
+        exit;    
+      }
+      catch (Exception $e) {
+        return array('success' =>  false, 'message' => $e->getMessage());
+      }
     }
+    else{
+      return array('success' =>  false, 'message' => $this->l('Total order must be greater than ') . $min_value);
+    }
+  }
 
-    return $this->display(__FILE__, 'payment_execution.tpl');
- 
+  public function hookDisplayPaymentExecution($params) {
+    global $smarty;
+
+
   }
   
   public function linkToCryptoMkt()
   {
       $cryptomarket_option = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
+      $paymentGateway = $this->fetch('module:cryptomarket/views/templates/front/payment_execution.tpl');
       $cryptomarket_option->setCallToActionText($this->l('CryptoMarket'))
+                    ->setForm($paymentGateway)
                     ->setAction(Configuration::get('PS_FO_PROTOCOL').__PS_BASE_URI__."modules/{$this->name}/payment.php");
       return $cryptomarket_option;
   }

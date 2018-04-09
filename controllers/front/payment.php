@@ -11,10 +11,34 @@ class cryptomarketPaymentModuleFrontController extends ModuleFrontController
    */
   public function initContent()
   {
+    $this->display_column_left = false;
     parent::initContent();
 
     $cart = $this->context->cart;
 
-    echo $this->module->execPayment($cart);
+    $result = $this->module->execPayment($cart);
+
+    if( $result['success'] ){
+      $this->context->smarty->assign(
+          array(
+              'status' => true,
+              'result' => $result['payload'],
+              'iframe' => file_get_contents($result['payload']['payment_url']),
+              'cart' => $cart
+          )
+      );
+    }
+    else{
+      $this->context->smarty->assign(
+          array(
+              'status' => false,
+              'message' => $result['message']
+          )
+      );
+    }
+
+    $this->setTemplate('payment_execution.tpl');
+
+    // echo $this->module->execPayment($cart);
   }
 }
