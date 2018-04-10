@@ -141,8 +141,6 @@ class cryptomarket extends PaymentModule{
 
 	public function uninstall()
 	{
-		// $this->clearCache('*');
-
 		if( !parent::uninstall() || !$this->unregisterHook('displayHome'))
 			return false;
 
@@ -255,12 +253,6 @@ class cryptomarket extends PaymentModule{
     else{
       return array('success' =>  false, 'message' => $this->l('Total order must be greater than ') . $min_value);
     }
-  }
-
-  public function hookDisplayPaymentExecution($params) {
-    global $smarty;
-
-
   }
   
   public function linkToCryptoMkt()
