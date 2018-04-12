@@ -223,7 +223,11 @@ class cryptomarket extends PaymentModule {
             $redirect_url = Context::getContext()->link->getModuleLink('cryptomarket', 'validation');
         }
 
-        $result = $client->getTicker(array('market' => 'ETH' . $currency->iso_code));
+        try {
+            $result = $client->getTicker(array('market' => 'ETH' . $currency->iso_code));
+        } catch (Exception $e) {
+            return array('success' => false, 'message' => $this->l('Currency does not supported: ' . $currency->iso_code));
+        }
 
         //Min value validation
         $min_value = (int) $result[0]['bid'] * 0.001;
