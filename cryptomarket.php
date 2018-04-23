@@ -149,27 +149,6 @@ class cryptomarket extends PaymentModule {
         return true;
     }
 
-    public function hookInvoice($params) {
-        global $smarty;
-
-        $id_order = $params['id_order'];
-        $bitcoinpaymentdetails = $this->readBitcoinpaymentdetails($id_order);
-        if ($bitcoinpaymentdetails['invoice_id'] === 0) {
-            return;
-        }
-
-        $smarty->assign(array(
-            'bitpayurl' => $this->bitpayurl,
-            'invoice_id' => $bitcoinpaymentdetails['invoice_id'],
-            'status' => $bitcoinpaymentdetails['status'],
-            'id_order' => $id_order,
-            'this_page' => $_SERVER['REQUEST_URI'],
-            'this_path' => $this->_path,
-            'this_path_ssl' => Configuration::get('PS_FO_PROTOCOL') . $_SERVER['HTTP_HOST'] . __PS_BASE_URI__ . "modules/{$this->name}/",
-        ));
-        return $this->display(__FILE__, 'invoice_block.tpl');
-    }
-
     public function hookPayment($params) {
         if (!$this->active) {
             return;
