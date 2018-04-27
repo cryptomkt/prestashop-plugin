@@ -188,12 +188,15 @@ class cryptomarket extends PaymentModule {
         return $payment_options;
     }
 
+    public function getCryptoMarketClient(){
+        $configuration = Cryptomkt\Exchange\Configuration::apiKey(Configuration::get('apikey'), Configuration::get('apisecret'));
+        return Cryptomkt\Exchange\Client::create($configuration);
+    }
+
     public function execPayment($cart) {
         global $smarty;
 
-        $configuration = Cryptomkt\Exchange\Configuration::apiKey(Configuration::get('apikey'), Configuration::get('apisecret'));
-        $client = Cryptomkt\Exchange\Client::create($configuration);
-
+        $client = $this->getCryptoMarketClient();
         $currency = Currency::getCurrencyInstance((int) $cart->id_currency);
 
         if (_PS_VERSION_ <= '1.5') {
