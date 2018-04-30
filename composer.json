@@ -19,23 +19,6 @@
         }
     ],
     "require": {
-        "php": ">=5.3",
-        "ext-curl": "*",
-        "ext-json": "*",
-        "composer/installers": "~1.0",
         "cryptomkt/cryptomkt": "1.1.x-dev"
-    },
-    "require-dev": {
-        "phpmd/phpmd": "*",
-        "phpdocumentor/phpdocumentor": "*",
-        "phing/phing": "*",
-        "pdepend/pdepend" : "1.1.0",
-        "squizlabs/php_codesniffer": "*",
-        "phpunit/phpunit": "*",
-        "phploc/phploc": "*",
-        "phpunit/phpunit-skeleton-generator": "*"
-    },
-    "config": {
-        "bin-dir": "bin"
     }
 }

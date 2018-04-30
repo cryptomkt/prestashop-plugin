@@ -199,6 +199,8 @@ class cryptomarket extends PaymentModule {
         $client = $this->getCryptoMarketClient();
         $currency = Currency::getCurrencyInstance((int) $cart->id_currency);
 
+        $callback_url  = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'modules/'.$this->name.'/updater.php';
+
         if (_PS_VERSION_ <= '1.5') {
             $redirect_url = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://') . htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8') . __PS_BASE_URI__ . 'order-confirmation.php?id_cart=' . $cart->id . '&id_module=' . $this->id . '&id_order=' . $this->currentOrder;
         } else {
@@ -222,7 +224,7 @@ class cryptomarket extends PaymentModule {
                     'to_receive_currency' => $currency->iso_code,
                     'to_receive' => $total_order,
                     'external_id' => $cart->id,
-                    'callback_url' => $redirect_url,
+                    'callback_url' => $callback_url,
                     'error_url' => $this->context->link->getPagelink('order&step=3'),
                     'success_url' => $redirect_url,
                     'refund_email' => $this->context->customer->email,
