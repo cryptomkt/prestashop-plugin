@@ -58,7 +58,7 @@ class cryptomarket extends PaymentModule {
 
     private function _setSettingHeader() {
         $this->_html .= '<div style="padding: 20px 50px 50px;">
-                      <img src="../modules/cryptomarket/logotipo-bld.png" />
+                      <img src="../modules/cryptomarket/img/logotipo-bld.png" />
                        <br><b>' . $this->l('This module allows you to accept payments by CryptoMarket.') . '</b><br /><br />
                        ' . $this->l('If the client chooses this payment mode, your CriptoMarket account will be automatically credited.') . '<br />
                        ' . $this->l('You need to configure your CryptoMarket account before using this module.') . '</div>';
