@@ -4,7 +4,9 @@
 
 {assign var='current_step' value='payment'}
 
+{if file_exists("$tpl_dir./order-steps.tpl")}
 {include file="$tpl_dir./order-steps.tpl"}
+{/if}
 
 {if ! $status }
 	<h2 class="warning">{$message}</h2>
