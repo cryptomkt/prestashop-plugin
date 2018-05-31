@@ -214,8 +214,8 @@ class cryptomarket extends PaymentModule {
         }
 
         //Min value validation
-        $min_value = (int) $result['data'][0]['bid'] * 0.001;
-        $total_order = $cart->getOrderTotal();
+        $min_value = (float) $result['data'][0]['bid'] * 0.001;
+        $total_order = (float) $cart->getOrderTotal();
 
         if ($total_order > $min_value) {
             try {
