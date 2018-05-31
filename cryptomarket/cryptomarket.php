@@ -7,7 +7,7 @@ if (!defined('_PS_VERSION_')) {
 //composer autoload
 $loader = require __DIR__ . '/vendor/autoload.php';
 $loader->add('Cryptomkt\\Exchange\\Client', __DIR__);
-$loader->add('Cryptomkt\\Exchange\\Configuration as CMConfiguration', __DIR__);
+$loader->add('Cryptomkt\\Exchange\\Configuration', __DIR__);
 
 class cryptomarket extends PaymentModule {
     private $_html = '';
@@ -189,8 +189,8 @@ class cryptomarket extends PaymentModule {
     }
 
     public function getCryptoMarketClient(){
-        $configuration = Cryptomkt\Exchange\Configuration::apiKey(Configuration::get('apikey'), Configuration::get('apisecret'));
-        return Cryptomkt\Exchange\Client::create($configuration);
+        $configuration = Configuration::apiKey(Configuration::get('apikey'), Configuration::get('apisecret'));
+        return Client::create($configuration);
     }
 
     public function execPayment($cart) {

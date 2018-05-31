@@ -19,6 +19,6 @@
         }
     ],
     "require": {
-        "cryptomkt/cryptomkt": "1.1.x-dev"
+        "cryptomkt/cryptomkt-httplug-php": "dev-master"
     }
 }
