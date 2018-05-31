@@ -6,8 +6,8 @@ if (!defined('_PS_VERSION_')) {
 
 //composer autoload
 $loader = require __DIR__ . '/vendor/autoload.php';
-$loader->add('Cryptomkt\\Exchange\\Client', __DIR__);
-$loader->add('Cryptomkt\\Exchange\\Configuration', __DIR__);
+$loader->addPsr4('Cryptomkt\\Exchange\\Client\\', __DIR__);
+$loader->addPsr4('Cryptomkt\\Exchange\\Configuration\\', __DIR__);
 
 class cryptomarket extends PaymentModule {
     private $_html = '';
@@ -189,8 +189,8 @@ class cryptomarket extends PaymentModule {
     }
 
     public function getCryptoMarketClient(){
-        $configuration = Configuration::apiKey(Configuration::get('apikey'), Configuration::get('apisecret'));
-        return Client::create($configuration);
+        $configuration = Cryptomkt\Exchange\Configuration::apiKey(Configuration::get('apikey'), Configuration::get('apisecret'));
+        return Cryptomkt\Exchange\Client::create($configuration);
     }
 
     public function execPayment($cart) {
@@ -214,7 +214,7 @@ class cryptomarket extends PaymentModule {
         }
 
         //Min value validation
-        $min_value = (int) $result[0]['bid'] * 0.001;
+        $min_value = (int) $result['data'][0]['bid'] * 0.001;
         $total_order = $cart->getOrderTotal();
 
         if ($total_order > $min_value) {
@@ -231,8 +231,9 @@ class cryptomarket extends PaymentModule {
                 );
 
                 $payload = $client->createPayOrder($payment);
+
                 \ob_clean();
-                header('Location:  ' . $payload['payment_url'] . '&redirect=1');
+                header('Location:  ' . $payload['data']['payment_url']);
                 exit;
             } catch (Exception $e) {
                 return array('success' => false, 'message' => $e->getMessage());
