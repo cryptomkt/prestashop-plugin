@@ -209,12 +209,15 @@ class cryptomarket extends PaymentModule {
 
         try {
             $result = $client->getTicker(array('market' => 'ETH' . $currency->iso_code));
+            if($result->status === 'error'){
+                return array('success' => false, 'message' => $this->l('Currency does not supported: ' . $currency->iso_code));
+            }
         } catch (Exception $e) {
             return array('success' => false, 'message' => $this->l('Currency does not supported: ' . $currency->iso_code));
         }
 
         //Min value validation
-        $min_value = (float) $result['data'][0]['bid'] * 0.001;
+        $min_value = (float) $result->data[0]->bid * 0.001;
         $total_order = (float) $cart->getOrderTotal();
 
         if ($total_order > $min_value) {
@@ -233,7 +236,7 @@ class cryptomarket extends PaymentModule {
                 $payload = $client->createPayOrder($payment);
 
                 \ob_clean();
-                header('Location:  ' . $payload['data']['payment_url']);
+                header('Location:  ' . $payload->data->payment_url);
                 exit;
             } catch (Exception $e) {
                 return array('success' => false, 'message' => $e->getMessage());
@@ -242,6 +245,7 @@ class cryptomarket extends PaymentModule {
             return array('success' => false, 'message' => $this->l('Total order must be greater than ') . $currency->iso_code . ' ' . $min_value);
         }
     }
+
 
     public function linkToCryptoMkt() {
         $cryptomarket_option = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();

@@ -19,14 +19,11 @@ class cryptomarketPaymentModuleFrontController extends ModuleFrontController {
             $this->context->smarty->assign(
                 array(
                     'status' => false,
-                    'message' => $result['message'],
-                    'back_url' => $result['back_url'],
+                    'message' => $result['message']
                 )
             );
-        }
+    }
 
-        $this->setTemplate('payment_execution.tpl');
-
-        // echo $this->module->execPayment($cart);
+    $this->setTemplate('payment_execution.tpl');
     }
 }
