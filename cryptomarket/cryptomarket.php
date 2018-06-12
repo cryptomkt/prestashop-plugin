@@ -231,13 +231,18 @@ class cryptomarket extends PaymentModule {
                     'error_url' => $this->context->link->getPagelink('order&step=3'),
                     'success_url' => $redirect_url,
                     'refund_email' => $this->context->customer->email,
-                );
+                );                
 
                 $payload = $client->createPayOrder($payment);
 
-                \ob_clean();
-                header('Location:  ' . $payload->data->payment_url);
-                exit;
+                if($payload->status === 'error'){
+                    return array('success' => false, 'message' => $payload->message);
+       	        }
+                else{
+                    \ob_clean();
+               	    header('Location:  ' . $payload->data->payment_url);
+                    exit;
+                }
             } catch (Exception $e) {
                 return array('success' => false, 'message' => $e->getMessage());
             }
