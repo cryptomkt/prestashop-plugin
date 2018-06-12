@@ -18,8 +18,8 @@ class cryptomarket extends PaymentModule {
     public function __construct() {
         $this->name = 'cryptomarket';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.0';
-        $this->author = 'CryptoMarket Development Team';
+        $this->version = '0.1.0';
+        $this->author = 'CryptoMarket Dev Team';
         $this->className = 'cryptomarket';
         $this->ps_versions_compliancy = array('min' => '1.5.x.x', 'max' => _PS_VERSION_);
         $this->bootstrap = false;
@@ -31,8 +31,8 @@ class cryptomarket extends PaymentModule {
 
         parent::__construct();
 
-        $this->displayName = $this->l('CryptoMarket');
-        $this->description = $this->l('Integrate cryptocurrencies into Prestashop and welcome to the new way for payments. Simple, Free and totally Secure.');
+        $this->displayName = $this->l('CryptoCompra by CryptoMarket');
+        $this->description = $this->l('Accept multiple cryptocurrencies and turn into local currency as EUR, CLP, BRL and ARS. Welcome to CryptoCompra a new way for payments: simple, free and totally secure.');
         $this->confirmUninstall = $this->l('Would you like uninstall this plugin?');
     }
 
@@ -237,10 +237,10 @@ class cryptomarket extends PaymentModule {
 
                 if($payload->status === 'error'){
                     return array('success' => false, 'message' => $payload->message);
-       	        }
+                }
                 else{
                     \ob_clean();
-               	    header('Location:  ' . $payload->data->payment_url);
+                    header('Location:  ' . $payload->data->payment_url);
                     exit;
                 }
             } catch (Exception $e) {

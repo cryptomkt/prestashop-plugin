@@ -1,4 +1,4 @@
-{capture name=path}{l s='Ethereum payment.' mod='cryptomarket'}{/capture}
+{capture name=path}{l s='CryptoCompra by CryptoMarket' mod='cryptomarket'}{/capture}
 
 {if isset($tpl_dir) && file_exists("$tpl_dir./order-steps.tpl")}
         {include file="$tpl_dir./order-steps.tpl"}

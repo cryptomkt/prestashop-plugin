@@ -2,8 +2,8 @@
 
 global $_MODULE;
 $_MODULE = array();
-$_MODULE['<{cryptomarket}prestashop>cryptomarket_56254538c0d73881c5836c41b638823b'] = 'CryptoMarket';
-$_MODULE['<{cryptomarket}prestashop>cryptomarket_88e8236020f5e6a5fb536de088ee7229'] = 'Integre las criptomonedas en Prestashop y dé la bienvenida a la nueva forma de pago. Simple, Gratis y totalmente Seguro.';
+$_MODULE['<{cryptomarket}prestashop>cryptomarket_333dd810738a0cf021babe54267d2bb8'] = 'CryptoCompra by CryptoMarket';
+$_MODULE['<{cryptomarket}prestashop>cryptomarket_8a3db81cc985c099c8e02e4c26b0540c'] = 'Acepte varias criptomonedas y convierta a monedas locales como EUR, CLP, BRL y ARS. Bienvenido a CryptoCompra una nueva forma de pago: simple, gratuita y totalmente segura.';
 $_MODULE['<{cryptomarket}prestashop>cryptomarket_3fd00b543b37f7ccee65574f7ce7179d'] = '¿Te gustaría desinstalar este complemento?';
 $_MODULE['<{cryptomarket}prestashop>cryptomarket_a8252af5153c76bd162887b638b7ba64'] = 'Lo sentimos, este módulo requiere la extensión de cURL PHP, pero no está habilitado en su servidor. Por favor, solicite ayuda a su proveedor de alojamiento web.';
 $_MODULE['<{cryptomarket}prestashop>cryptomarket_fd6c4f7ce98528056f8dd11281f73eb7'] = 'Este módulo le permite aceptar pagos por CryptoMarket.';
@@ -17,3 +17,14 @@ $_MODULE['<{cryptomarket}prestashop>cryptomarket_d876ff8da67c3731ae25d8335a4168b
 $_MODULE['<{cryptomarket}prestashop>cryptomarket_1ddec0f92f297e937bdf409977df0c02'] = 'API Secret	';
 $_MODULE['<{cryptomarket}prestashop>cryptomarket_d4dccb8ca2dac4e53c01bd9954755332'] = 'Guardar ajustes';
 $_MODULE['<{cryptomarket}prestashop>cryptomarket_9ab84ec8738e5864fb220ed6f7df5272'] = 'La orden total debe ser mayor que ';
+$_MODULE['<{cryptomarket}prestashop>cryptomarket_56254538c0d73881c5836c41b638823b'] = 'CryptoMarket';
+$_MODULE['<{cryptomarket}prestashop>payment_12c9aa9ba9e3802538dbd83296a1acf8'] = 'Pague con criptomonedas como Bitcoin, Ethereum y Stellar.';
+$_MODULE['<{cryptomarket}prestashop>validation_e2b7dec8fa4b498156dfee6e4c84b156'] = 'Este método de pago no está disponible.';
+$_MODULE['<{cryptomarket}prestashop>payment_execution_333dd810738a0cf021babe54267d2bb8'] = 'CryptoCompra by CryptoMarket	';
+$_MODULE['<{cryptomarket}prestashop>payment_execution_f1d3b424cd68795ecaa552883759aceb'] = 'Resumen de la orden';
+$_MODULE['<{cryptomarket}prestashop>payment_execution_d5ced2655b26052fae8485553cd2679d'] = 'Volver a la página de pedido';
+$_MODULE['<{cryptomarket}prestashop>payment_execution17_495fe037f55334ed6a24aa90a0059d08'] = 'Estado del pago: resumen del pedido';
+$_MODULE['<{cryptomarket}prestashop>payment_return_88526efe38fd18179a127024aba8c1d7'] = 'Su pedido esta %s completo.';
+$_MODULE['<{cryptomarket}prestashop>payment_return_ca7e41a658753c87973936d7ce2429a8'] = 'Si tiene preguntas, comentarios o inquietudes, contáctenos.';
+$_MODULE['<{cryptomarket}prestashop>payment_return_dfe239de8c0b2453a8e8f7657a191d5d'] = 'equipo experto de atención al cliente.';
+$_MODULE['<{cryptomarket}prestashop>payment_return_d15feee53d81ea16269e54d4784fa123'] = 'Notamos un problema con su orden. Si crees que esto es un error, no dudes en contactarnos.';
