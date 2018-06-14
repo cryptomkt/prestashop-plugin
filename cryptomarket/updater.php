@@ -50,76 +50,86 @@ class Updater extends cryptomarket{
             error_log('[Info] Order ID present in JSON payload...');
         }
 
-        $client = $this->getCryptoMarketClient();
-
         $cart_id = $payload->external_id; error_log('[Info] Cart ID:' . $cart_id);
-        // $order = wc_get_order($order_id);
-        // $order_states = $this->get_option('order_states');
 
-        if ((int)Order::getOrderByCartId($cart_id)) {
-            error_log('[Error] The Plugin was called but could not retrieve the order details for order_id: "' . $order_id . '". If you use an alternative order numbering system, please see class-wc-gateway-cryptomarket.php to apply a search filter.');
-            throw new \Exception('The Plugin was called but could not retrieve the order details for order_id ' . $order_id . '. Cannot continue!');
+        if ( $order = (int)Order::getOrderByCartId($cart_id)) {
+            error_log('[Error] The Plugin was called but could not retrieve the cart details for cart_id: "' . $cart_id . '". If you use an alternative order numbering system, please see class-wc-gateway-cryptomarket.php to apply a search filter.');
+            throw new \Exception('The Plugin was called but could not retrieve the cart details for cart_id ' . $cart_id . '. Cannot continue!');
         } else {
             error_log('[Info] Order details retrieved successfully...');
         }
 
-        $current_status = $order->get_status();
-        if (false === isset($current_status) && true === empty($current_status)) {
-            error_log('[Error] The Plugin was calledbut could not obtain the current status from the order.');
-            throw new \Exception('The Plugin was called but could not obtain the current status from the order. Cannot continue!');
-        } else {
-            error_log('[Info] The current order status for this order is ' . $current_status);
-        }
-
         switch ($payload->status) {
             case "-4":
-                error_log('[Info] Pago múltiple. Orden ID:'.$order_id);
-                $order->update_status($order_states['invalid']);
+                error_log('[Info] Pago múltiple. Cart ID:'.$cart_id);
+                $status_cryptomarket = Configuration::get('PS_OS_PREPARATION');
 
                 exit('Pago Multiple');
                 break;
             case "-3":
-                error_log('[Info] Monto pagado no concuerda. Orden ID:'.$order_id);
-                $order->update_status($order_states['invalid']);
+                error_log('[Info] Monto pagado no concuerda. Cart ID:'.$cart_id);
+                $status_cryptomarket = Configuration::get('PS_OS_PREPARATION');
 
                 exit('Monto pagado no concuerda');
                 break;
             case "-2":
-                error_log('[Info] Falló conversión. Orden ID:'.$order_id);
-                $order->update_status($order_states['invalid']);
+                error_log('[Info] Falló conversión. Cart ID:'.$cart_id);
+                $status_cryptomarket = Configuration::get('PS_OS_PREPARATION');
 
                 exit('Falló conversión');
                 break;
             case "-1":
-                error_log('[Info] Expiró orden de pago. Orden ID:'.$order_id);
-                $order->update_status($order_states['invalid']);
+                error_log('[Info] Expiró orden de pago. Cart ID:'.$cart_id);
+                $status_cryptomarket = Configuration::get('PS_OS_PREPARATION');
 
                 exit('Expiró orden de pago');
                 break;
             case "0":
-                error_log('[Info] Esperando pago. Orden ID:'.$order_id);
-                $order->update_status($order_states['waiting_pay']);
+                error_log('[Info] Esperando pago. Cart ID:'.$cart_id);
+                $status_cryptomarket = Configuration::get('PS_OS_PAYMENT');
 
                 break;
             case "1":
-                error_log('[Info] Esperando bloque. Orden ID:'.$order_id);
-                $order->update_status($order_states['waiting_block']);
+                error_log('[Info] Esperando bloque. Cart ID:'.$cart_id);
+                $status_cryptomarket = Configuration::get('PS_OS_PAYMENT');
 
                 break;
             case "2":
-                error_log('[Info] Esperando procesamiento. Orden ID:'.$order_id);
-                $order->update_status($order_states['waiting_processing']);
+                error_log('[Info] Esperando procesamiento. Cart ID:'.$cart_id);
+                $status_cryptomarket = Configuration::get('PS_OS_PAYMENT');
 
                 break;
             case "3":
-                error_log('[Info] Pago exitoso. Orden ID:'.$order_id);
-                $order->update_status($order_states['complete']);
+                error_log('[Info] Pago exitoso. Cart ID:'.$cart_id);
+                $status_cryptomarket = Configuration::get('PS_OS_PAYMENT');
                 break;
 
             default:
-                error_log('[Error] No status payment defined:'.$payload->status.'. Order ID:'.$order_id);
+                error_log('[Error] No status payment defined:'.$payload->status.'. Cart ID:'.$cart_id);
                 break;
         }
+
+        if ($order == 0){
+            $cryptomarket = new cryptomarket();
+            $cart = new Cart($cart_id);
+
+            $key = 'test';
+            $cryptomarket->validateOrder($cart_id, $status_cryptomarket, $cart->getTotalCart($cart_id), $cryptomarket->displayName, null, array(), null, false, $key);
+            $cryptomarket->writeDetails($cryptomarket->currentOrder, $cart_id, $status_cryptomarket);
+        }
+        else{
+            if (empty(Context::getContext()->link)){
+                Context::getContext()->link = new Link(); // workaround a prestashop bug so email is sent 
+            }
+
+            $order = new Order((int)Order::getOrderByCartId($cart_id));
+            $new_history = new OrderHistory();
+            $new_history->id_order = (int)$order->id;
+            $order_status = (int)$status_cryptomarket;
+            $new_history->changeIdOrderState((int)$order_status, $order, true);
+            $new_history->addWithemail(true);
+        }
+        
         exit;
     }
 
