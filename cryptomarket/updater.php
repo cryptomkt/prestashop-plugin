@@ -2,11 +2,6 @@
 include(dirname(__FILE__).'/../../config/config.inc.php');
 include(dirname(__FILE__).'/cryptomarket.php');
 
-//composer autoload
-$loader = require __DIR__ . '/vendor/autoload.php';
-$loader->add('Cryptomkt\\Exchange\\Client', __DIR__);
-$loader->add('Cryptomkt\\Exchange\\Configuration as CMConfiguration', __DIR__);
-
 /**
  * [update_order_states wc-api update order status]
  */
@@ -113,9 +108,13 @@ class Updater extends cryptomarket{
             $cryptomarket = new cryptomarket();
             $cart = new Cart($cart_id);
 
-            $key = 'test';
-            $cryptomarket->validateOrder($cart_id, $status_cryptomarket, $cart->getTotalCart($cart_id), $cryptomarket->displayName, null, array(), null, false, $key);
-            $cryptomarket->writeDetails($cryptomarket->currentOrder, $cart_id, $status_cryptomarket);
+            $customer = new Customer($cart->id_customer);
+
+            $currency = new Currency($cart->id_currency);
+
+            $total = (float)$cart->getOrderTotal(true, Cart::BOTH);
+
+            $cryptomarket->validateOrder($cart->id, $status_cryptomarket, $total, $cryptomarket->displayName, NULL, NULL, (int)$currency->id, false, $customer->secure_key);
         }
         else{
             if (empty(Context::getContext()->link)){
