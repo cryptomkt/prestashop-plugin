@@ -228,9 +228,10 @@ class cryptomarket extends PaymentModule {
                     'to_receive' => $total_order,
                     'external_id' => $cart->id,
                     'callback_url' => $callback_url,
-                    'error_url' => $this->context->link->getPagelink('order&step=3'),
+                    'error_url' => $this->context->link->getPagelink(),
                     'success_url' => $redirect_url,
                     'refund_email' => $this->context->customer->email,
+                    'language' => strtolower(Configuration::get('PS_LOCALE_LANGUAGE'))
                 );                
 
                 $payload = $client->createPayOrder($payment);

@@ -14,7 +14,7 @@ class Updater extends cryptomarket{
         $this->updateOrderStates();
 	}
 
-    public function updateOrderStates() {
+    public function updateOrderStates(){ 
         if (true === empty($_POST)) {
             error_log('[Error] Plugin received empty POST data for an callback_url message.');
             exit;
@@ -38,6 +38,13 @@ class Updater extends cryptomarket{
             error_log('[Info] Order ID present in payload...');
         }
 
+        if (false === array_key_exists('signature', $payload) && $payload->signature === (string) $this->getHash('sha384', $payload->id . $payload->status, Configuration::get('apisecret')) ) {
+            error_log('[Error] Request is not signed:' . var_export($payload, true));
+            exit;
+        } else {
+            error_log('[Info] Signature valid present in payload...');
+        }
+
         if (false === array_key_exists('external_id', $payload)) {
             error_log('[Error] Plugin did not receive an Order ID present in payload: ' . var_export($payload, true));
             exit;
@@ -59,39 +66,35 @@ class Updater extends cryptomarket{
                 error_log('[Info] Pago múltiple. Cart ID:'.$cart_id);
                 $status_cryptomarket = Configuration::get('PS_OS_PREPARATION');
 
-                exit('Pago Multiple');
                 break;
             case "-3":
                 error_log('[Info] Monto pagado no concuerda. Cart ID:'.$cart_id);
-                $status_cryptomarket = Configuration::get('PS_OS_PREPARATION');
+                $status_cryptomarket = Configuration::get('PS_OS_ERROR');
 
-                exit('Monto pagado no concuerda');
                 break;
             case "-2":
                 error_log('[Info] Falló conversión. Cart ID:'.$cart_id);
-                $status_cryptomarket = Configuration::get('PS_OS_PREPARATION');
+                $status_cryptomarket = Configuration::get('PS_OS_ERROR');
 
-                exit('Falló conversión');
                 break;
             case "-1":
                 error_log('[Info] Expiró orden de pago. Cart ID:'.$cart_id);
-                $status_cryptomarket = Configuration::get('PS_OS_PREPARATION');
+                $status_cryptomarket = Configuration::get('PS_OS_ERROR');
 
-                exit('Expiró orden de pago');
                 break;
             case "0":
                 error_log('[Info] Esperando pago. Cart ID:'.$cart_id);
-                $status_cryptomarket = Configuration::get('PS_OS_PAYMENT');
+                $status_cryptomarket = Configuration::get('PS_OS_PREPARATION');
 
                 break;
             case "1":
                 error_log('[Info] Esperando bloque. Cart ID:'.$cart_id);
-                $status_cryptomarket = Configuration::get('PS_OS_PAYMENT');
+                $status_cryptomarket = Configuration::get('PS_OS_PREPARATION');
 
                 break;
             case "2":
                 error_log('[Info] Esperando procesamiento. Cart ID:'.$cart_id);
-                $status_cryptomarket = Configuration::get('PS_OS_PAYMENT');
+                $status_cryptomarket = Configuration::get('PS_OS_PREPARATION');
 
                 break;
             case "3":
@@ -131,7 +134,6 @@ class Updater extends cryptomarket{
         
         exit;
     }
-
 }
 
 $test = new Updater();
