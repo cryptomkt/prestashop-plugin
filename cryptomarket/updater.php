@@ -109,6 +109,7 @@ class Updater extends cryptomarket{
 
         if ($order == 0){
             $cryptomarket = new cryptomarket();
+
             $cart = new Cart($cart_id);
 
             $customer = new Customer($cart->id_customer);
@@ -134,14 +135,12 @@ class Updater extends cryptomarket{
         
         exit;
     }
+
+    protected function getHash($algo, $data, $key){
+        return hash_hmac($algo, $data, $key, FALSE);
+    }
 }
 
 $test = new Updater();
-
 exit;
-
-
-
-//execute
-// update_order_states();
 ?>
