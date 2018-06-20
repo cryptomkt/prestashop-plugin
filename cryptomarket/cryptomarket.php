@@ -201,12 +201,6 @@ class cryptomarket extends PaymentModule {
 
         $callback_url  = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'modules/'.$this->name.'/updater.php';
 
-        if (_PS_VERSION_ <= '1.5') {
-            $redirect_url = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://') . htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8') . __PS_BASE_URI__ . 'order-confirmation.php?id_cart=' . $cart->id . '&id_module=' . $this->id . '&id_order=' . $this->currentOrder;
-        } else {
-            $redirect_url = Context::getContext()->link->getModuleLink('cryptomarket', 'validation');
-        }
-
         try {
             $result = $client->getTicker(array('market' => 'ETH' . $currency->iso_code));
             if($result->status === 'error'){
@@ -228,8 +222,8 @@ class cryptomarket extends PaymentModule {
                     'to_receive' => $total_order,
                     'external_id' => $cart->id,
                     'callback_url' => $callback_url,
-                    'error_url' => $this->context->link->getPagelink('order&step=1'),
-                    'success_url' => $redirect_url,
+                    'error_url' => $this->context->link->getPagelink('order'),
+                    'success_url' => $this->context->link->getPagelink('order'),
                     'refund_email' => $this->context->customer->email,
                     'language' => strtolower(Configuration::get('PS_LOCALE_LANGUAGE'))
                 );                
