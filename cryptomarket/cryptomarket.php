@@ -42,7 +42,7 @@ class cryptomarket extends PaymentModule {
             return false;
         }
 
-        if (!parent::install() || !$this->registerHook('invoice') || !$this->registerHook('paymentReturn') || !$this->registerHook('payment') || !$this->registerHook('paymentOptions')) {
+        if (!parent::install() || !$this->registerHook('invoice') || !$this->registerHook('paymentReturn') || !$this->registerHook('payment') || !$this->registerHook('paymentOptions') || $this->addOrderState($this->l('Procesando CryptoCompra'))) {
             return false;
         }
 
@@ -214,12 +214,13 @@ class cryptomarket extends PaymentModule {
         $min_value = (float) $result->data[0]->bid * 0.001;
         $total_order = (float)$cart->getOrderTotal(true, Cart::BOTH);
 
-        if ($total_order > $min_value) {                             
+        if ($total_order > $min_value) {
             try {
                 //create order
                 $customer = new Customer($cart->id_customer);
-                $this->validateOrder($cart->id, Configuration::get('PS_OS_PREPARATION'), $total_order, $this->displayName, NULL, NULL, (int)$currency->id, false, $customer->secure_key);
-                
+                $order_state = $this->getOrderState('Procesando CryptoCompra');
+                $this->validateOrder($cart->id, $order_state['id_order_state'], $total_order, $this->displayName, NULL, NULL, (int)$currency->id, false, $customer->secure_key);
+
                 if (_PS_VERSION_ <= '1.5') {
                     $success_url = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://') . htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8') . __PS_BASE_URI__ . 'order-confirmation.php?id_cart=' . $cart->id . '&id_module=' . $this->id . '&id_order=' . $this->currentOrder;
                 } else {
@@ -236,7 +237,7 @@ class cryptomarket extends PaymentModule {
                     'success_url' => $success_url,
                     'refund_email' => $this->context->customer->email,
                     'language' => strtolower(Configuration::get('PS_LOCALE_LANGUAGE'))
-                );                
+                );
 
                 $payload = $client->createPayOrder($payment);
 
@@ -256,7 +257,6 @@ class cryptomarket extends PaymentModule {
         }
     }
 
-
     public function linkToCryptoMkt() {
         $cryptomarket_option = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
         $paymentGateway = $this->fetch('module:cryptomarket/views/templates/front/payment_execution.tpl');
@@ -264,6 +264,53 @@ class cryptomarket extends PaymentModule {
             ->setForm($paymentGateway)
             ->setAction(Configuration::get('PS_FO_PROTOCOL') . __PS_BASE_URI__ . "modules/{$this->name}/payment.php");
         return $cryptomarket_option;
+    }
+
+    public function addOrderState($name){
+        $state_exist = false;
+        $states = OrderState::getOrderStates((int)$this->context->language->id);
+
+        // check if order state exist
+        foreach ($states as $state) {
+            if (in_array($name, $state)) {
+                $state_exist = true;
+                break;
+            }
+        }
+
+        // If the state does not exist, we create it.
+        if (!$state_exist) {
+            // create new order state
+            $order_state = new OrderState();
+            $order_state->color = '#00ffff';
+            $order_state->send_email = true;
+            $order_state->module_name = $this->name;
+            $order_state->template = 'preparation';
+            $order_state->name = array();
+            $languages = Language::getLanguages(false);
+            foreach ($languages as $language)
+                $order_state->name[ $language['id_lang'] ] = $name;
+
+            // Update object
+            $order_state->add();
+        }
+
+        return true;
+    }
+
+    public function getOrderState($name){
+        $state = false;
+        $states = OrderState::getOrderStates((int)$this->context->language->id);
+
+        // check if order state exist
+        foreach ($states as $state) {
+            if (in_array($name, $state)) {
+                $state = $state;
+                break;
+            }
+        }
+
+        return $state;
     }
 }
 ?>
