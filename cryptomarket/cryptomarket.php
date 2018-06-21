@@ -201,6 +201,8 @@ class cryptomarket extends PaymentModule {
 
         $callback_url  = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'modules/'.$this->name.'/updater.php';
 
+
+
         try {
             $result = $client->getTicker(array('market' => 'ETH' . $currency->iso_code));
             if($result->status === 'error'){
@@ -212,18 +214,28 @@ class cryptomarket extends PaymentModule {
 
         //Min value validation
         $min_value = (float) $result->data[0]->bid * 0.001;
-        $total_order = (float) $cart->getOrderTotal();
+        $total_order = (float)$cart->getOrderTotal(true, Cart::BOTH);
 
-        if ($total_order > $min_value) {
+        if ($total_order > $min_value) {                             
             try {
+                //create order
+                $customer = new Customer($cart->id_customer);
+                $this->validateOrder($cart->id, Configuration::get('PS_OS_PREPARATION'), $total_order, $this->displayName, NULL, NULL, (int)$currency->id, false, $customer->secure_key);
+                
+                if (_PS_VERSION_ <= '1.5') {
+                    $success_url = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://') . htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8') . __PS_BASE_URI__ . 'order-confirmation.php?id_cart=' . $cart->id . '&id_module=' . $this->id . '&id_order=' . $this->currentOrder;
+                } else {
+                    $success_url = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://') . htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8') . __PS_BASE_URI__ . 'index.php?controller=order-confirmation&id_cart='.(int)$cart->id.'&id_module='.(int)$this->id.'&id_order='.$this->currentOrder.'&key='.$customer->secure_key;
+                }
+
                 $payment = array(
                     'payment_receiver' => Configuration::get('payment_receiver'),
                     'to_receive_currency' => $currency->iso_code,
                     'to_receive' => $total_order,
-                    'external_id' => $cart->id,
+                    'external_id' => $this->currentOrder,
                     'callback_url' => $callback_url,
                     'error_url' => $this->context->link->getPagelink('order'),
-                    'success_url' => $this->context->link->getPagelink('order'),
+                    'success_url' => $success_url,
                     'refund_email' => $this->context->customer->email,
                     'language' => strtolower(Configuration::get('PS_LOCALE_LANGUAGE'))
                 );                
