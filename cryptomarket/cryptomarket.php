@@ -201,8 +201,6 @@ class cryptomarket extends PaymentModule {
 
         $callback_url  = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'modules/'.$this->name.'/updater.php';
 
-
-
         try {
             $result = $client->getTicker(array('market' => 'ETH' . $currency->iso_code));
             if($result->status === 'error'){
