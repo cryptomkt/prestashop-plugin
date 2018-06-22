@@ -1,4 +1,15 @@
 <?php 
+/*
+ * Plugin Name: CryptoCompra by CryptoMarket
+ * Plugin URI: https://github.com/cryptomkt/prestashop-plugin
+ * Description: Accept multiple cryptocurrencies and turn into local currency as EUR, CLP, BRL and ARS. Welcome to CryptoCompra a new way for payments: simple, free and totally secure.
+ * Version: v0.1.1
+ * Author: CryptoMarket Dev Team
+ * Author URI: http://www.cryptomkt.com/
+ * License: The MIT License (MIT)
+ *
+ */
+
 include(dirname(__FILE__).'/../../config/config.inc.php');
 include(dirname(__FILE__).'/cryptomarket.php');
 
@@ -8,7 +19,7 @@ include(dirname(__FILE__).'/cryptomarket.php');
 
 class Updater extends cryptomarket{
 
-	function __construct(){
+	public function __construct(){
         parent::__construct();
 
         $this->updateOrderStates();
@@ -25,7 +36,7 @@ class Updater extends cryptomarket{
         $payload = (object) $_POST;
 
         if (true === empty($payload)) {
-            error_log('[Error] Invalid JSON payload: ' . $post_body);
+            error_log('[Error] Invalid JSON payload: ' . $payload);
             exit;
         } else {
             error_log('[Info] The post data was decoded into JSON...');
@@ -38,7 +49,9 @@ class Updater extends cryptomarket{
             error_log('[Info] Pay Order ID present in payload...');
         }
 
-        if (false === array_key_exists('signature', $payload) && $payload->signature === (string) $this->getHash('sha384', $payload->id . $payload->status, Configuration::get('apisecret')) ) {
+        $cryptomarket = new cryptomarket();
+
+        if (false === array_key_exists('signature', $payload) && false === $cryptomarket->checkResponseSignature($payload->signature, $payload->id, $payload->status)) {
             error_log('[Error] Request is not signed:' . var_export($payload, true));
             exit;
         } else {

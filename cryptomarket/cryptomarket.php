@@ -1,4 +1,14 @@
 <?php
+/*
+ * Plugin Name: CryptoCompra by CryptoMarket
+ * Plugin URI: https://github.com/cryptomkt/prestashop-plugin
+ * Description: Accept multiple cryptocurrencies and turn into local currency as EUR, CLP, BRL and ARS. Welcome to CryptoCompra a new way for payments: simple, free and totally secure.
+ * Version: v0.1.1
+ * Author: CryptoMarket Dev Team
+ * Author URI: http://www.cryptomkt.com/
+ * License: The MIT License (MIT)
+ *
+ */
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -58,16 +68,14 @@ class cryptomarket extends PaymentModule {
 
     private function _setSettingHeader() {
         $this->_html .= '<div style="padding: 20px 50px 50px;">
-                      <img src="../modules/cryptomarket/img/logotipo-bld.png" />
+                      <img src="../modules/cryptomarket/views/img/logotipo-bld.png" />
                        <br><b>' . $this->l('This module allows you to accept payments by CryptoMarket.') . '</b><br /><br />
                        ' . $this->l('If the client chooses this payment mode, your CriptoMarket account will be automatically credited.') . '<br />
                        ' . $this->l('You need to configure your CryptoMarket account before using this module.') . '</div>';
     }
 
     private function _postProcess() {
-        global $currentIndex, $cookie;
         if (Tools::isSubmit('submitcryptomarket')) {
-            $template_available = array('A', 'B', 'C');
             $this->_errors = array();
             if (Tools::getValue('apikey') == NULL) {
                 $this->_errors[] = $this->l('Missing API Key');
@@ -118,8 +126,6 @@ class cryptomarket extends PaymentModule {
     }
 
     private function _getSettingsTabHtml() {
-        global $cookie;
-
         $html = '<h2>' . $this->l('Settings') . '</h2>
                <div style="clear:both;margin-bottom:30px;">
 
@@ -164,8 +170,6 @@ class cryptomarket extends PaymentModule {
     }
 
     public function hookPaymentReturn($params) {
-        global $smarty;
-
         $order = ($params['objOrder']);
         $state = $order->current_state;
         $smarty->assign(array(
@@ -177,15 +181,10 @@ class cryptomarket extends PaymentModule {
 
     public function hookPaymentOptions($params) {
         if (!$this->active) {
-            return;
-        } else {
+            return false;
         }
-
-        $payment_options = [
-            $this->linkToCryptoMkt(),
-        ];
-
-        return $payment_options;
+        
+        return array( 0 => $this->linkToCryptoMkt() );
     }
 
     public function getCryptoMarketClient(){
@@ -194,8 +193,6 @@ class cryptomarket extends PaymentModule {
     }
 
     public function execPayment($cart) {
-        global $smarty;
-
         $client = $this->getCryptoMarketClient();
         $currency = Currency::getCurrencyInstance((int) $cart->id_currency);
 
@@ -236,7 +233,7 @@ class cryptomarket extends PaymentModule {
                     'error_url' => $this->context->link->getPagelink('order'),
                     'success_url' => $success_url,
                     'refund_email' => $this->context->customer->email,
-                    'language' => strtolower(Configuration::get('PS_LOCALE_LANGUAGE'))
+                    'language' => Tools::strtolower(Configuration::get('PS_LOCALE_LANGUAGE'))
                 );
 
                 $payload = $client->createPayOrder($payment);
@@ -246,7 +243,7 @@ class cryptomarket extends PaymentModule {
                 }
                 else{
                     \ob_clean();
-                    header('Location:  ' . $payload->data->payment_url);
+                    Tools::redirect('Location:  ' . $payload->data->payment_url);
                     exit;
                 }
             } catch (Exception $e) {
@@ -311,6 +308,10 @@ class cryptomarket extends PaymentModule {
         }
 
         return $state;
+    }
+
+    public function checkResponseSignature($hash, $id, $status){
+        return $hash === Cryptomkt\Exchange\Authentication::getHash('sha384', $id . $status, Configuration::get('apisecret'));
     }
 }
 ?>
