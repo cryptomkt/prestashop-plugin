@@ -29,7 +29,7 @@
         </p>
 {else}
       	<p class="warning">
-                {l s="We noticed a problem with your order. If you think this is an error, feel free to contact our" mod='cryptomarket'}
+                {l s='We noticed a problem with your order. If you think this is an error, feel free to contact our' mod='cryptomarket'}
                 <a href="{$link->getPageLink('contact', true)|escape:'html'}">{l s='Contact us' mod='cryptomarket'}</a>.
         </p>
 {/if}

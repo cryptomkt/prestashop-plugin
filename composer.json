@@ -19,6 +19,7 @@
         }
     ],
     "require": {
-        "cryptomkt/cryptomkt-httplug-php": "dev-master"
+        "cryptomkt/cryptomkt-httplug-php": "dev-master",
+        "friendsofphp/php-cs-fixer": "^2.12"
     }
 }

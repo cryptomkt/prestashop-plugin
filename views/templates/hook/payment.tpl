@@ -25,8 +25,8 @@
 <div class="row">
   <div class="col-xs-12 col-md-6">
     <p class="payment_module">
-            <a href="{$this_path}payment.php" title="{l s='Pay with Cryptocurrencies like Bitcoin, Ethereum and Stellar' mod='cryptomarket'}" style="padding-left: 60px">
-                <img src="{$this_path}/views/img/logotipo-bld.png" width="400" height="188" alt="{l s='' mod='cryptomarket'}" /><br>
+            <a href="{ $this_path | lower }payment.php" title="{l s='Pay with Cryptocurrencies like Bitcoin, Ethereum and Stellar' mod='cryptomarket'}" style="padding-left: 60px">
+                <img src="{ $this_path | lower }/views/img/logotipo-bld.png" width="400" height="188" alt="{l s='' mod='cryptomarket'}" /><br>
                 {l s='Pay with Cryptocurrencies like Bitcoin, Ethereum and Stellar' mod='cryptomarket'}
             </a>
     </p>
