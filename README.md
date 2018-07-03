@@ -5,7 +5,7 @@ Cryptocompra is the new way for pay with the most used cryptocurrencies in the w
   - Support for Bitcoin, Stellar and Ethereum Cryptocurrencies.
   - New API v1.1 updates.
   - Payments with ARS(Argentinian Peso), BRL(Real brazilian), CLP(Chilean peso) and EUR(Euro).
-  - Configuration panel for access credential.
+  - Configuration panel for access credentials.
 
 ## Development
 ### Setup
@@ -47,10 +47,6 @@ $ ./node_modules/.bin/grunt build
 
 ### Prestashop support
 
-* [Homepage](http://www.prestashop.com/woocommerce/)
-* [Documentation](http://docs.woothemes.com)
-* [Support](https://support.woothemes.com)
-* 
 The official PrestaShop 1.7 documentation is available online [on its own website][1]
 First-time users will be particularly interested in the following guides:
 * [Getting Started][2]: How to install PrestaShop, and what you need to know.
