@@ -23,10 +23,10 @@
 *
 *}
 <div class="row">
-  <div class="col-xs-12 col-md-6">
+  <div class="col-xs-12 col-md-12">
     <p class="payment_module">
-            <a href="{ $this_path | lower }payment.php" title="{l s='Pay with Cryptocurrencies like Bitcoin, Ethereum and Stellar' mod='cryptomarket'}" style="padding-left: 60px">
-                <img src="{ $this_path | lower }/views/img/logotipo-bld.png" width="400" height="188" alt="{l s='' mod='cryptomarket'}" /><br>
+            <a href="{$this_path|escape:'html'}payment.php" title="{l s='Pay with Cryptocurrencies like Bitcoin, Ethereum and Stellar' mod='cryptomarket'}" style="padding-left: 60px">
+                <img src="{$this_path|escape:'html'}/views/img/color-btn300-cryptocompra.png" width="300" height="54" alt="{l s='Accept multiple cryptocurrencies and turn into local currency as EUR, CLP, BRL and ARS. Welcome to CryptoCompra a new way for payments: simple, free and totally secure.' mod='cryptomarket'}" />
                 {l s='Pay with Cryptocurrencies like Bitcoin, Ethereum and Stellar' mod='cryptomarket'}
             </a>
     </p>

@@ -10,3 +10,5 @@ composer.phar
 /dist/
 /node_modules/
 npm_debug.log
+.php_cs.cache
+php-cs-fixer

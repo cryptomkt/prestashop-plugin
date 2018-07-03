@@ -18,7 +18,7 @@ abstract class Controller extends ControllerCore
     public function __construct()
     {
         // Load Composer vendor packages
-        require _PS_ROOT_DIR_ . '/vendor/autoload.php';
+        require _PS_MODULE_DIR_ . '/vendor/autoload.php';
 
         parent::__construct();
     }

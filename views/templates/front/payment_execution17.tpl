@@ -32,8 +32,8 @@
 {block name='page_content'}
 <div class="container">
     <section class="page_content">
-        {if isset($status) && !$status }
-                <h2 class="warning">{ $message|capitalize }</h2>
+        {if isset($status) && !$status}
+                <h2 class="warning">{$message|capitalize}</h2>
         {/if}
     </section>
 </div>
