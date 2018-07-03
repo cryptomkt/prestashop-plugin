@@ -38,7 +38,7 @@ module.exports = function(grunt) {
     } else {
       res.map(function(path){
         _files_to_build.push({src: 'index.php', dest: path })
-      }); console.log(_files_to_build);
+      });
     }
   });
 
