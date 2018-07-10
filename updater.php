@@ -60,7 +60,7 @@ class Updater extends cryptomarket
             exit;
         } else {
             error_log('[Info] Signature present in payload...');
-        }        
+        }
 
         if ($Cryptomarket->checkResponseSignature($payload->signature, $payload->id, $payload->status) !== true) {
             error_log('[Error] Request is bad signed:' . var_export($payload, true));

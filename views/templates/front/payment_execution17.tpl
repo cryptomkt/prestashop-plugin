@@ -33,7 +33,7 @@
 <div class="container">
     <section class="page_content">
         {if isset($status) && !$status}
-                <h2 class="warning">{$message|capitalize}</h2>
+                <h2 class="warning">{$message|escape:'htmlall'}</h2>
         {/if}
     </section>
 </div>

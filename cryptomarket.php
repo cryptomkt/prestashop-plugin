@@ -44,6 +44,7 @@ class Cryptomarket extends PaymentModule
         $this->verifypeer = 1;
         $this->verifyhost = 2;
         $this->currencies = true;
+        $this->module_key = 'cf627c37d30e1768e5ab1640e20be045';
 
         parent::__construct();
 
@@ -55,12 +56,15 @@ class Cryptomarket extends PaymentModule
     public function install()
     {
         if (!function_exists('curl_version')) {
-            $this->_errors[] = $this->l('Sorry, this module requires the cURL PHP extension but it is not enabled on your server.');
+            $this->_errors[] = $this->l('Sorry, this module requires the cURL PHP extension but it is not enabled 
+                on your server.');
 
             return false;
         }
 
-        if (!parent::install() || !$this->registerHook('invoice') || !$this->registerHook('paymentReturn') || !$this->registerHook('payment') || !$this->registerHook('paymentOptions') || !$this->addOrderState($this->l('Procesando CryptoCompra'))) {
+        if (!parent::install() || !$this->registerHook('invoice') || !$this->registerHook('paymentReturn')
+            || !$this->registerHook('payment') || !$this->registerHook('paymentOptions')
+            || !$this->addOrderState($this->l('Procesando CryptoCompra'))) {
             return false;
         }
 
@@ -75,8 +79,38 @@ class Cryptomarket extends PaymentModule
     public function getContent()
     {
         $this->_postProcess();
-        $this->_setSettingHeader();
-        $this->_setConfigurationForm();
+
+        $this->smarty->assign(array(
+            'this_path' => $this->_path,
+            'request_uri' => htmlentities($_SERVER['REQUEST_URI']),
+            'js_dir' => _PS_BASE_URL_._PS_JS_DIR_,
+            'css_dir' => _PS_BASE_URL_._PS_CSS_DIR_,
+            'cryptomkt_payment_receiver' => htmlentities(
+                Tools::getValue(
+                    'cryptomkt_payment_receiver',
+                    Configuration::get('cryptomkt_payment_receiver')
+                ),
+                ENT_COMPAT,
+                'UTF-8'
+            ),
+            'cryptomkt_apikey' => htmlentities(
+                Tools::getValue(
+                    'cryptomkt_apikey',
+                    Configuration::get('cryptomkt_apikey')
+                ),
+                ENT_COMPAT,
+                'UTF-8'
+            ),
+            'cryptomkt_apisecret' => htmlentities(
+                Tools::getValue(
+                    'cryptomkt_apisecret',
+                    Configuration::get('cryptomkt_apisecret')
+                ),
+                ENT_COMPAT,
+                'UTF-8'
+            ), ));
+
+        $this->htmloutput = $this->display(__FILE__, 'settings.tpl');
 
         return $this->htmloutput;
     }
@@ -133,7 +167,10 @@ class Cryptomarket extends PaymentModule
      */
     public function getCryptoMarketClient()
     {
-        $configuration = Cryptomkt\Exchange\Configuration::apiKey(Configuration::get('apikey'), Configuration::get('apisecret'));
+        $configuration = Cryptomkt\Exchange\Configuration::apiKey(
+            Configuration::get('cryptomkt_apikey'),
+            Configuration::get('cryptomkt_apisecret')
+        );
 
         return Cryptomkt\Exchange\Client::create($configuration);
     }
@@ -150,15 +187,23 @@ class Cryptomarket extends PaymentModule
         $client = $this->getCryptoMarketClient();
         $currency = Currency::getCurrencyInstance((int) $cart->id_currency);
 
-        $callback_url = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'modules/'.$this->name.'/updater.php';
+        $callback_url = (
+            Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://'
+        )
+            .htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8')
+            .__PS_BASE_URI__.'modules/'.$this->name.'/updater.php';
 
         try {
             $result = $client->getTicker(array('market' => 'ETH'.$currency->iso_code));
             if ('error' === $result->status) {
-                return array('success' => false, 'message' => $this->l('Currency does not supported: '.$currency->iso_code));
+                return array(
+                    'success' => false,
+                    'message' => $this->l('Currency does not supported: '.$currency->iso_code), );
             }
         } catch (Exception $e) {
-            return array('success' => false, 'message' => $this->l('Currency does not supported: '.$currency->iso_code));
+            return array(
+                'success' => false,
+                'message' => $this->l('Currency does not supported: '.$currency->iso_code), );
         }
 
         //Min value validation
@@ -179,7 +224,7 @@ class Cryptomarket extends PaymentModule
                 }
 
                 $payment = array(
-                    'payment_receiver' => Configuration::get('payment_receiver'),
+                    'payment_receiver' => Configuration::get('cryptomkt_payment_receiver'),
                     'to_receive_currency' => $currency->iso_code,
                     'to_receive' => $total_order,
                     'external_id' => $this->currentOrder,
@@ -275,23 +320,14 @@ class Cryptomarket extends PaymentModule
 
     public function checkResponseSignature($hash, $id, $status)
     {
-        return Cryptomkt\Exchange\Authentication\ApiKeyAuthentication::checkHash($hash, $id.$status, Configuration::get('apisecret'));
-    }
-
-    private function _setSettingHeader()
-    {
-        $this->htmloutput .= '<div style="padding: 20px 50px 50px;">
-                      <img src="../modules/cryptomarket/views/img/logotipo-bld.png" />
-                       <br><b>'.$this->l('This module allows you to accept payments by CryptoMarket.').'</b><br /><br />
-                       '.$this->l('If the client chooses this payment mode, your CriptoMarket account will be automatically credited.').'<br />
-                       '.$this->l('You need to configure your CryptoMarket account before using this module.').'</div>';
+        return Cryptomkt\Exchange\Authentication\ApiKeyAuthentication::checkHash($hash, $id.$status, Configuration::get('cryptomkt_apisecret'));
     }
 
     private function _postProcess()
     {
         if (Tools::isSubmit('submitcryptomarket')) {
             $this->_errors = array();
-            if (null === Tools::getValue('apikey')) {
+            if (null === Tools::getValue('cryptomkt_apikey')) {
                 $this->_errors[] = $this->l('Missing API Key');
             }
 
@@ -304,63 +340,11 @@ class Cryptomarket extends PaymentModule
 
                 $this->htmloutput = $this->displayError($error_msg);
             } else {
-                Configuration::updateValue('payment_receiver', trim(Tools::getValue('payment_receiver')));
-                Configuration::updateValue('apikey', trim(Tools::getValue('apikey')));
-                Configuration::updateValue('apisecret', trim(Tools::getValue('apisecret')));
+                Configuration::updateValue('cryptomkt_payment_receiver', trim(Tools::getValue('cryptomkt_payment_receiver')));
+                Configuration::updateValue('cryptomkt_apikey', trim(Tools::getValue('cryptomkt_apikey')));
+                Configuration::updateValue('cryptomkt_apisecret', trim(Tools::getValue('cryptomkt_apisecret')));
                 $this->htmloutput = $this->displayConfirmation($this->l('Settings updated'));
             }
         }
-    }
-
-    private function _setConfigurationForm()
-    {
-        $this->htmloutput .= '<form method="post" action="'.htmlentities($_SERVER['REQUEST_URI']).'">
-                       <script type="text/javascript">
-                       var pos_select = '.(($tab = (int) Tools::getValue('tabs')) ? $tab : '0').';
-                       </script>';
-        if (_PS_VERSION_ <= '1.5') {
-            $this->htmloutput .= '<script type="text/javascript" src="'._PS_BASE_URL_._PS_JS_DIR_.'tabpane.js"></script>
-                         <link type="text/css" rel="stylesheet" href="'._PS_BASE_URL_._PS_CSS_DIR_.'tabpane.css" />';
-        } else {
-            $this->htmloutput .= '<script type="text/javascript" src="'._PS_BASE_URL_._PS_JS_DIR_.'jquery/plugins/tabpane/jquery.tabpane.js"></script>
-                         <link type="text/css" rel="stylesheet" href="'._PS_BASE_URL_._PS_JS_DIR_.'jquery/plugins/tabpane/jquery.tabpane.css" />';
-        }
-        $this->htmloutput .= '<input type="hidden" name="tabs" id="tabs" value="0" />
-                       <div class="tab-pane" id="tab-pane-1" style="width:100%;">
-                       <div class="tab-page" id="step1">
-                       <h4 class="tab">'.$this->l('Settings').'</h2>
-                       '.$this->_getSettingsTabHtml().'
-                       </div>
-                       </div>
-                       <div class="clear"></div>
-                       <script type="text/javascript">
-                       function loadTab(id){}
-                       setupAllTabs();
-                       </script>
-                       </form>';
-    }
-
-    private function _getSettingsTabHtml()
-    {
-        $html = '<h2>'.$this->l('Settings').'</h2>
-               <div style="clear:both;margin-bottom:30px;">
-
-               <h3 style="clear:both;margin-left:5px;margin-top:10px">'.$this->l('Payment Receiver Email').'</h3>
-
-               <input type="text" style="width:400px;" name="payment_receiver" value="'.htmlentities(Tools::getValue('payment_receiver', Configuration::get('payment_receiver')), ENT_COMPAT, 'UTF-8').'" />
-
-               <h3 style="clear:both;margin-left:5px;margin-top:10px">'.$this->l('API Key').'</h3>
-
-               <input type="text" style="width:400px;" name="apikey" value="'.htmlentities(Tools::getValue('apikey', Configuration::get('apikey')), ENT_COMPAT, 'UTF-8').'" />
-
-               <h3 style="clear:both;margin-left:5px">'.$this->l('API Secret').'</h3>
-
-               <input type="text" style="width:400px;" name="apisecret" value="'.htmlentities(Tools::getValue('apisecret', Configuration::get('apisecret')), ENT_COMPAT, 'UTF-8').'" />
-
-               <p class="center"><input class="button" type="submit" name="submitcryptomarket" value="'.$this->l('Save settings').'" /></p>
-               </div>
-               ';
-
-        return $html;
     }
 }
