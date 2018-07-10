@@ -55,8 +55,15 @@ class Updater extends cryptomarket
 
         $Cryptomarket = new Cryptomarket();
 
-        if (false === array_key_exists('signature', $payload) && false === $Cryptomarket->checkResponseSignature($payload->signature, $payload->id, $payload->status)) {
+        if (false === array_key_exists('signature', $payload)) {
             error_log('[Error] Request is not signed:' . var_export($payload, true));
+            exit;
+        } else {
+            error_log('[Info] Signature present in payload...');
+        }        
+
+        if ($Cryptomarket->checkResponseSignature($payload->signature, $payload->id, $payload->status) !== true) {
+            error_log('[Error] Request is bad signed:' . var_export($payload, true));
             exit;
         } else {
             error_log('[Info] Signature valid present in payload...');
