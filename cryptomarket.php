@@ -23,6 +23,11 @@ $loader->add('Cryptomkt\\Exchange\\Client\\', dirname(__FILE__));
 $loader->add('Cryptomkt\\Exchange\\Configuration\\', dirname(__FILE__));
 $loader->add('Cryptomkt\\Exchange\\Authentication\\', dirname(__FILE__));
 
+//environment variables
+$loader->add('Dotenv\\', dirname(__FILE__));
+$dotenv = new Dotenv\Dotenv(dirname(__FILE__));
+$dotenv->load();
+
 class Cryptomarket extends PaymentModule
 {
     private $htmloutput = '';
@@ -34,7 +39,7 @@ class Cryptomarket extends PaymentModule
     {
         $this->name = 'cryptomarket';
         $this->tab = 'payments_gateways';
-        $this->version = '0.1.1';
+        $this->version = '0.1.2';
         $this->author = 'CryptoMarket Dev Team';
         $this->className = 'cryptomarket';
         $this->ps_versions_compliancy = array('min' => '1.5.x.x', 'max' => _PS_VERSION_);
@@ -44,7 +49,7 @@ class Cryptomarket extends PaymentModule
         $this->verifypeer = 1;
         $this->verifyhost = 2;
         $this->currencies = true;
-        $this->module_key = 'cf627c37d30e1768e5ab1640e20be045';
+        $this->module_key = $_ENV['MODULE_KEY'];
 
         parent::__construct();
 

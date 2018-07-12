@@ -15,8 +15,8 @@ Cryptocompra is the new way for pay with the most used cryptocurrencies in the w
 
 Clone the repo:
 ```bash
-$ git clone https://github.com/cryptomarket/woocommerce-plugin
-$ cd woocommerce-plugin
+$ git clone https://github.com/cryptomkt/prestashop-plugin
+$ cd prestashop-plugin
 ```
 Install the dependencies:
 ```bash
