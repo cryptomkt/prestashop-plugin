@@ -42,7 +42,7 @@
 		{l s='You need to configure your CryptoMarket account before using this module.' mod='cryptomarket'}</p>
 </div>
 
-<form method="post" action="{$request_uri|escape:'htmlall'}">
+<form method="post" action="{$request_uri|escape:'utf8'}">
 	<input type="hidden" name="tabs" id="tabs" value="0" />
 	<div class="tab-pane" id="tab-pane-1" style="width:100%;">
 		<div class="tab-page" id="step1">
