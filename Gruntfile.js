@@ -1,5 +1,5 @@
 /**
- * @license Copyright 2017-2018 Cryptomarket Inc., MIT License 
+ * @license Copyright 2017-2018 Cryptomarket Inc., MIT License
  * see https://github.com/cryptomkt/prestashop-plugin/blob/master/LICENSE
  */
 
@@ -26,7 +26,7 @@ module.exports = function(grunt) {
             {src: 'cryptomarket.php', dest: 'dist/cryptomarket/'},
             {src: 'logo.gif', dest: 'dist/cryptomarket/'},
             {src: 'payment.php', dest: 'dist/cryptomarket/'},
-            {src: 'LICENSE', dest: 'dist/cryptomarket/'}, 
+            {src: 'LICENSE', dest: 'dist/cryptomarket/'},
             {src: 'updater.php', dest: 'dist/cryptomarket/'},
             {src: 'README.md', dest: 'dist/cryptomarket/'},
             {src: 'index.php', dest: 'dist/cryptomarket/vendor/'}

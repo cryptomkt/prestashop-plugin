@@ -20,8 +20,5 @@
     ],
     "require": {
         "cryptomkt/cryptomkt-httplug-php": "dev-master"
-    },
-    "require-dev":{
-        "vlucas/phpdotenv": "^2.5"
     }
 }

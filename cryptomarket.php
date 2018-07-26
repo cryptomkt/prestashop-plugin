@@ -23,11 +23,6 @@ $loader->add('Cryptomkt\\Exchange\\Client\\', dirname(__FILE__));
 $loader->add('Cryptomkt\\Exchange\\Configuration\\', dirname(__FILE__));
 $loader->add('Cryptomkt\\Exchange\\Authentication\\', dirname(__FILE__));
 
-//environment variables
-$loader->add('Dotenv\\', dirname(__FILE__));
-$dotenv = new Dotenv\Dotenv(dirname(__FILE__));
-$dotenv->load();
-
 class Cryptomarket extends PaymentModule
 {
     private $htmloutput = '';
@@ -49,19 +44,18 @@ class Cryptomarket extends PaymentModule
         $this->verifypeer = 1;
         $this->verifyhost = 2;
         $this->currencies = true;
-        $this->module_key = $_ENV['MODULE_KEY'];
-
-        parent::__construct();
-
+        $this->module_key = 'cf627c37d30e1768e5ab1640e20be045';
         $this->displayName = $this->l('CryptoCompra by CryptoMarket');
         $this->description = $this->l('Accept multiple cryptocurrencies and turn into local currency as EUR, CLP, BRL and ARS. Welcome to CryptoCompra a new way for payments: simple, free and totally secure.');
         $this->confirmUninstall = $this->l('Would you like uninstall this plugin?');
+
+        parent::__construct();
     }
 
     public function install()
     {
         if (!function_exists('curl_version')) {
-            $this->_errors[] = $this->l('Sorry, this module requires the cURL PHP extension but it is not enabled 
+            $this->_errors[] = $this->l('Sorry, this module requires the cURL PHP extension but it is not enabled
                 on your server.');
 
             return false;

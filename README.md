@@ -1,5 +1,5 @@
 # CryptoCompra by CryptoMarket
-[![N|Solid](https://www.cryptocompra.com/img/logo.png)](https://nodesource.com/products/nsolid)
+[![N|CryptoCompra](https://www.cryptocompra.com/img/logo.png)](https://www.cryptocompra.com/)
 
 Cryptocompra is the new way for pay with the most used cryptocurrencies in the world, this Prestashop plugin includes.
   - Support for Bitcoin, Stellar and Ethereum Cryptocurrencies.
@@ -60,7 +60,7 @@ First-time users will be particularly interested in the following guides:
 1. Ensure a valid SSL certificate is installed on your server. Also ensure your root CA cert is updated. If your CA cert is not current, you will see curl SSL verification errors.
 2. Verify that your web server is not blocking POSTs from servers it may not recognize. Double check this on your firewall as well, if one is being used.
 3. Check the version of this plugin against the official plugin repository to ensure you are using the latest version. Your issue might have been addressed in a newer version! See the [Releases](https://github.com/cryptomkt/prestashop-plugin/releases) page for the latest.
-4. If all else fails, enable debug logging in the plugin options and send the log along with an email describing your issue **in detail** to support@cryptomarket.com
+4. If all else fails, enable debug logging in the plugin options and send the log along with an email describing your issue **in detail** to support@cryptomkt.com
 
 **TIP**: When contacting support it will help us is you provide:
 
