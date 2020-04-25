@@ -48,6 +48,7 @@ class Cryptomarket extends PaymentModule
         $this->displayName = $this->l('CryptoCompra by CryptoMarket');
         $this->description = $this->l('Accept multiple cryptocurrencies and turn into local currency as EUR, CLP, BRL and ARS. Welcome to CryptoCompra a new way for payments: simple, free and totally secure.');
         $this->confirmUninstall = $this->l('Would you like uninstall this plugin?');
+        $this->default_min_value = 500;
 
         parent::__construct();
     }
@@ -206,10 +207,12 @@ class Cryptomarket extends PaymentModule
         }
 
         //Min value validation
-        $min_value = (float) $result->data[0]->bid * 0.001;
+        if(isset($result->data[0])){
+            $this->default_min_value = (float) $result->data[0]->bid * 0.001;
+        }
         $total_order = (float) $cart->getOrderTotal(true, Cart::BOTH);
 
-        if ($total_order > $min_value) {
+        if ($total_order > $this->default_min_value) {
             try {
                 //create order
                 $customer = new Customer($cart->id_customer);

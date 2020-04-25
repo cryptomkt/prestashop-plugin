@@ -13,3 +13,4 @@ npm_debug.log
 .php_cs.cache
 php-cs-fixer
 .env
+package-lock.json
