@@ -48,7 +48,7 @@ class Cryptomarket extends PaymentModule
         $this->displayName = $this->l('CryptoCompra by CryptoMarket');
         $this->description = $this->l('Accept multiple cryptocurrencies and turn into local currency as EUR, CLP, BRL and ARS. Welcome to CryptoCompra a new way for payments: simple, free and totally secure.');
         $this->confirmUninstall = $this->l('Would you like uninstall this plugin?');
-        $this->default_min_value = 500;
+        $this->default_min_value = 1000;
 
         parent::__construct();
     }
