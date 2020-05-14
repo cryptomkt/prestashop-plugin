@@ -1,5 +1,5 @@
 # CryptoCompra by CryptoMarket
-[![N|CryptoCompra](https://www.cryptocompra.com/img/logo.png)](https://www.cryptocompra.com/)
+[![N|CryptoCompra](https://static.cryptomkt.com/static/global/assets/images/cmkt-blue-footer.png)](https://www.cryptocompra.com/)
 
 Cryptocompra is the new way for pay with the most used cryptocurrencies in the world, this Prestashop plugin includes.
   - Support for Bitcoin, Stellar and Ethereum Cryptocurrencies.
